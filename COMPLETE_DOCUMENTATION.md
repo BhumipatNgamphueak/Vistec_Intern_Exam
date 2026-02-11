@@ -80,7 +80,7 @@ cd ~/IsaacLab
 
 ```bash
 # Activate Isaac Lab environment (if using conda)
-conda activate isaaclab  # Skip if not using conda
+conda activate env_isaaclab  # Skip if not using conda
 
 cd $UNITREE_LAB
 ~/IsaacLab/isaaclab.sh -p -m pip install -e source/unitree_rl_lab
@@ -99,7 +99,7 @@ cd $VISTEC_REPO
 
 ```bash
 # Activate Isaac Lab environment (if using conda)
-conda activate isaaclab  # Skip if not using conda
+conda activate env_isaaclab  # Skip if not using conda
 
 cd $UNITREE_LAB
 
@@ -145,7 +145,7 @@ All models are in `trained_models/` directory (27 MB total):
 
 ```bash
 # Activate Isaac Lab environment (if using conda)
-conda activate isaaclab  # Skip if not using conda
+conda activate env_isaaclab  # Skip if not using conda
 
 cd $UNITREE_LAB
 
