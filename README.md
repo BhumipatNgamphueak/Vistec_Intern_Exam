@@ -10,19 +10,20 @@
 
 **Complete, self-contained Sim2Sim transfer learning package**. Train in Isaac Lab, deploy to Gazebo. No additional repos needed!
 
-> 📘 **COMPLETE GUIDE**: [COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md) - All documentation in one place!
->
-> 🚀 **Quick Start**: See sections below for 30-minute setup
-
 ---
 
 ## 📋 Quick Navigation
 
-- **[COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md)** ← All documentation in one file
-- [Quick Start](#-quick-start) - 30-minute setup
-- [Gazebo Deployment](#-gazebo-deployment-3-terminals) - Launch robot simulation
-- [Pre-trained Models](#-pre-trained-models) - 6 ready-to-use policies
-- [Troubleshooting](#-troubleshooting) - Common issues & fixes
+| Section | Description |
+|---------|-------------|
+| [Quick Start](#-quick-start) | Clone to running policies in 30 min |
+| [Pre-trained Models](#-pre-trained-models) | 6 ready-to-use policies (27 MB) |
+| [Gazebo Deployment](#-deployment) | 3-terminal workflow |
+| [Training Pipeline](#-training-pipeline) | Train your own policies |
+| [4 Locomotion Tasks](#-4-locomotion-tasks) | Stand, Walk, Turn, Combined |
+| [Velocity Commands](#-velocity-commands-guide) | Simplified & detailed testing |
+| [Troubleshooting](#-troubleshooting) | Common issues & solutions |
+| [Task Names](#-registered-task-names) | All registered Isaac Lab tasks |
 
 ---
 
@@ -43,12 +44,11 @@ This repository enables you to:
 
 ```
 Vistec_Intern_Exam/
-├── README.md                          # This comprehensive guide
-├── COMPLETE_DOCUMENTATION.md          # Complete reference (all-in-one)
+├── README.md                          # This complete guide
 │
 ├── verify_setup.sh                    # Setup verification script
 ├── send_velocity_commands_gazebo.sh   # Gazebo velocity control (14 options)
-├── send_velocity_commands_isaac.py    # Isaac velocity presets (13 tasks)
+├── send_velocity_commands_isaac.py    # Isaac velocity presets (4 tasks + variants)
 │
 ├── trained_models/                    # Pre-trained policies (27 MB)
 │   ├── mlp_dr.pt                      # ⭐ RECOMMENDED (MLP + DR)
@@ -159,6 +159,79 @@ cd $VISTEC_REPO
 
 ---
 
+## 🎯 Pre-trained Models
+
+All models are in `trained_models/` directory (27 MB total):
+
+| Model File | Size | Actuator | Domain Randomization | Status |
+|------------|------|----------|---------------------|---------|
+| **mlp_dr.pt** | 4.4 MB | MLP | ✅ Yes | ⭐ **RECOMMENDED** |
+| mlp.pt | 4.4 MB | MLP | ❌ No | Baseline comparison |
+| lstm_dr.pt | 4.4 MB | LSTM | ✅ Yes | Research use |
+| lstm.pt | 4.4 MB | LSTM | ❌ No | Ablation study |
+| Implicit_dr.pt | 4.4 MB | Implicit | ✅ Yes | Physics-based |
+| implicit.pt | 4.4 MB | Implicit | ❌ No | Baseline |
+
+### Quick Test Commands
+
+```bash
+# Activate Isaac Lab environment (if using conda)
+conda activate env_isaaclab  # Skip if not using conda
+
+cd $UNITREE_LAB
+
+# 1. MLP with DR (RECOMMENDED - Best Sim2Sim transfer)
+~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-MLP-Custom \
+  --checkpoint $VISTEC_REPO/trained_models/mlp_dr.pt \
+  --num_envs 4
+
+# 2. LSTM with DR
+~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-LSTM-DR \
+  --checkpoint $VISTEC_REPO/trained_models/lstm_dr.pt \
+  --num_envs 4
+
+# 3. Implicit with DR
+~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-Implicit-DR \
+  --checkpoint $VISTEC_REPO/trained_models/Implicit_dr.pt \
+  --num_envs 4
+```
+
+---
+
+## ✅ Registered Task Names
+
+Based on `__init__.py`, here are the **CORRECT** task names:
+
+### MLP Actuator Tasks
+1. `Unitree-Go2-Velocity-MLP-Custom` - MLP with Domain Randomization ⭐ **RECOMMENDED**
+2. `Unitree-Go2-Velocity-MLP-No-DR` - MLP without Domain Randomization
+
+### LSTM Actuator Tasks
+3. `Unitree-Go2-Velocity-LSTM-DR` - LSTM with Domain Randomization
+4. `Unitree-Go2-Velocity-LSTM-No-DR` - LSTM without Domain Randomization
+
+### Implicit Actuator Tasks
+5. `Unitree-Go2-Velocity-Implicit-DR` - Implicit with Domain Randomization
+6. `Unitree-Go2-Velocity-Implicit` - Implicit without Domain Randomization
+
+### Base Task
+7. `Unitree-Go2-Velocity` - Base configuration
+
+### Task Name Pattern
+
+```
+Unitree-Go2-Velocity-[ACTUATOR]-[DR_STATUS]
+```
+
+Where:
+- `[ACTUATOR]` = MLP-Custom, MLP, LSTM, Implicit
+- `[DR_STATUS]` = DR, No-DR, Custom, or omitted for base
+
+---
+
 ## 🎓 Training Pipeline
 
 ### Stage 1: Install Isaac Lab Extension
@@ -178,14 +251,17 @@ cd $UNITREE_LAB
 ### Stage 2: Train Policy
 
 ```bash
+# Activate Isaac Lab environment (if using conda)
+conda activate env_isaaclab # Skip if not using conda
+
 cd $UNITREE_LAB
 
 # Train MLP policy with domain randomization (RECOMMENDED)
 # Time: 6-8 hours on RTX 3090
-python scripts/rsl_rl/train.py \
-    --task Unitree-Go2-Velocity-MLP-Custom \
-    --num_envs 4096 \
-    --headless
+~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/train.py \
+  --task Unitree-Go2-Velocity-MLP-Custom \
+  --num_envs 4096 \
+  --headless
 
 # Training produces: logs/rsl_rl/unitree_go2_velocity_mlp_custom/{timestamp}/model_*.pt
 ```
@@ -200,15 +276,15 @@ python scripts/rsl_rl/train.py \
 
 ```bash
 # Activate Isaac Lab environment (if using conda)
-conda activate isaaclab  # Skip if not using conda
+conda activate env_isaaclab   # Skip if not using conda
 
 cd $UNITREE_LAB
 
 # Test policy (automatically exports to ONNX/JIT)
-python scripts/rsl_rl/play.py \
-    --task Unitree-Go2-Velocity-MLP-Custom \
-    --num_envs 32 \
-    --load_run {timestamp}
+~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-MLP-Custom \
+  --num_envs 32 \
+  --load_run {timestamp}
 
 # Exported to: logs/rsl_rl/.../exported/policy.onnx
 ```
@@ -227,6 +303,9 @@ python scripts/rsl_rl/play.py \
 **Use pre-trained models from this repo**:
 
 ```bash
+# Activate Isaac Lab environment (if using conda)
+conda activate env_isaaclab   # Skip if not using conda
+
 cd $UNITREE_LAB
 
 # Create directory structure
@@ -237,11 +316,11 @@ cp $VISTEC_REPO/trained_models/mlp_dr.pt \
    logs/rsl_rl/unitree_go2_velocity_mlp_custom/pretrained/
 
 # Play policy
-python scripts/rsl_rl/play.py \
-    --task Unitree-Go2-Velocity-MLP-Custom \
-    --num_envs 32 \
-    --load_run pretrained \
-    --checkpoint logs/rsl_rl/unitree_go2_velocity_mlp_custom/pretrained/mlp_dr.pt
+~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-MLP-Custom \
+  --num_envs 32 \
+  --load_run pretrained \
+  --checkpoint logs/rsl_rl/unitree_go2_velocity_mlp_custom/pretrained/mlp_dr.pt
 ```
 
 ### Option B: Gazebo (Realistic Simulation with ROS 2)
@@ -249,12 +328,7 @@ python scripts/rsl_rl/play.py \
 #### Setup ROS 2 Workspace (First Time)
 
 ```bash
-# Create workspace
-mkdir -p $VISTEC_WS/src
 cd $VISTEC_WS
-
-# Copy ROS 2 packages from this repo
-cp -r $VISTEC_REPO/Vistec_ex_ws/src/* src/
 
 # Install dependencies and build
 rosdep install --from-paths src --ignore-src -r -y
@@ -265,21 +339,9 @@ source install/setup.bash
 echo "source $VISTEC_WS/install/setup.bash" >> ~/.bashrc
 ```
 
-#### Launch Gazebo with Policy
+#### Launch Gazebo with Policy (3 Terminals)
 
-**Step 1: Launch Gazebo Fortress (Terminal 1)**
-
-```bash
-cd $VISTEC_WS
-source install/setup.bash
-
-# Launch Gazebo with Go2 robot
-ros2 launch go2_gazebo_simulation go2_fortress.launch.py
-```
-
-**Expected**: Gazebo opens with Go2 robot spawned
-
-**Step 2: Deploy Policy (Terminal 2)**
+**Step 1: Deploy Policy (Terminal 2)**
 
 ```bash
 # Deactivate conda if active
@@ -290,29 +352,48 @@ source install/setup.bash
 
 # Deploy pre-trained MLP policy (RECOMMENDED)
 ros2 launch deploy_policy go2_deploy.launch.py \
-    policy_path:=$VISTEC_REPO/trained_models/mlp_dr.pt \
-    device:=cpu
+  policy_path:=$VISTEC_REPO/trained_models/mlp_dr.pt \
+  device:=cpu
 ```
+
+**Step 2: Launch Gazebo Fortress (Terminal 1)**
+
+```bash
+# Deactivate conda if active
+conda deactivate
+
+cd $VISTEC_WS
+source install/setup.bash
+
+# Launch Gazebo with Go2 robot
+ros2 launch go2_gazebo_simulation go2_fortress.launch.py
+```
+
+**Expected**: Gazebo opens with Go2 robot spawned
 
 **Launch Arguments**:
 - `policy_path`: Path to .pt or .onnx model
 - `device`: `cpu` or `cuda` (default: cpu, use `cuda` if GPU available)
 
-#### Send Velocity Commands (Terminal 3)
+**Step 3: Send Velocity Commands (Terminal 3)**
 
-**Interactive Menu (14 options matching 4 training tasks)**:
+**Interactive Menu (14 options for 4 training tasks)**:
 ```bash
 cd $VISTEC_REPO
 ./send_velocity_commands_gazebo.sh
 
-# Select an option (e.g., Option 3: Walk normal at 1.0 m/s)
+# Select an option:
+# Option 1  - Task 1: Standing
+# Option 3  - Task 2: Walking (1.0 m/s)
+# Option 7  - Task 3: Turn in Place (1.0 rad/s CCW)
+# Option 10 - Task 4: Walk + Turn (arc)
 ```
 
 **Manual Command**:
 ```bash
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
-    "linear: {x: 1.0, y: 0.0, z: 0.0}
-     angular: {x: 0.0, y: 0.0, z: 0.0}" --rate 10
+  "linear: {x: 1.0, y: 0.0, z: 0.0}
+   angular: {x: 0.0, y: 0.0, z: 0.0}" --rate 10
 ```
 
 ---
@@ -321,66 +402,144 @@ ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
 
 The robot is trained and tested on **4 fundamental locomotion primitives**:
 
-### Task 1: Standing
-**Goal**: Maintain stable standing position
+| Task | Description | lin_x (m/s) | lin_y (m/s) | ang_z (rad/s) | Isaac Preset | Gazebo Menu |
+|------|-------------|-------------|-------------|---------------|--------------|-------------|
+| **1** | Standing | 0.0 | 0.0 | 0.0 | `--task 1` | Option 1 |
+| **2** | Walking (forward) | 1.0 | 0.0 | 0.0 | `--task 2` | Option 3 |
+| **3** | Turn in Place (CCW) | 0.0 | 0.0 | 1.0 | `--task 3` | Option 7 |
+| **4** | Walk + Turn (arc) | 0.8 | 0.0 | 0.6 | `--task 4` | Option 10 |
 
-| Variant | lin_x | lin_y | ang_z | Gazebo Option | Isaac Preset |
-|---------|-------|-------|-------|---------------|--------------|
-| Stand still | 0.0 | 0.0 | 0.0 | Option 1 | `--task 1` |
+**Notes**:
+- Task 2 supports varying speeds (0.5-1.5 m/s) - adjust with `--linear_x` parameter
+- Task 3 supports different turn rates and directions - adjust with `--angular_z` parameter
+- Task 4 supports various arcs and combined maneuvers - adjust with both parameters
+- For detailed variants, use `--task 2.1`, `--task 2.2`, etc. (see `--list` for all options)
 
-### Task 2: Walking
-**Goal**: Walk forward at varying speeds
+---
 
-| Variant | lin_x (m/s) | lin_y | ang_z | Gazebo Option | Isaac Preset |
-|---------|-------------|-------|-------|---------------|--------------|
-| Slow | 0.5 | 0.0 | 0.0 | Option 2 | `--task 2.1` |
-| Normal | 1.0 | 0.0 | 0.0 | Option 3 | `--task 2.2` ⭐ |
-| Fast | 1.5 | 0.0 | 0.0 | Option 4 | `--task 2.3` |
-| Moderate | 0.8 | 0.0 | 0.0 | Option 5 | `--task 2.4` |
+## 📊 Velocity Commands Guide
 
-### Task 3: Turn in Place
-**Goal**: Rotate without forward motion
+You have **TWO ways** to test the 4 locomotion tasks:
 
-| Variant | lin_x | lin_y | ang_z (rad/s) | Gazebo Option | Isaac Preset |
-|---------|-------|-------|---------------|---------------|--------------|
-| Slow CCW | 0.0 | 0.0 | +0.5 | Option 6 | `--task 3.1` |
-| Normal CCW | 0.0 | 0.0 | +1.0 | Option 7 | `--task 3.2` |
-| Normal CW | 0.0 | 0.0 | -1.0 | Option 8 | `--task 3.3` |
-| Fast CCW | 0.0 | 0.0 | +1.5 | Option 9 | `--task 3.4` |
+### 🎯 SIMPLIFIED (4 Commands - Quick Testing)
 
-### Task 4: Walk + Turn (Combined Maneuvers)
-**Goal**: Execute combined forward and rotational motion
+Perfect for quick testing of each main task category.
 
-| Variant | Description | lin_x (m/s) | ang_z (rad/s) | Gazebo Option | Isaac Preset |
-|---------|-------------|-------------|---------------|---------------|--------------|
-| Right arc | Arc to right | 0.8 | +0.6 | Option 10 | `--task 4.1` |
-| Straight fast | Fast forward | 1.2 | 0.0 | Option 11 | `--task 4.2` |
-| Left arc | Arc to left | 0.8 | -0.6 | Option 12 | `--task 4.3` |
-| Tight turn | Circle walk | 0.5 | +1.0 | Option 13 | `--task 4.4` |
-
-### Using Task Presets
+**Isaac Lab**:
+```bash
+python send_velocity_commands_isaac.py --task 1   # Task 1: Standing
+python send_velocity_commands_isaac.py --task 2   # Task 2: Walking (1.0 m/s)
+python send_velocity_commands_isaac.py --task 3   # Task 3: Turning (1.0 rad/s)
+python send_velocity_commands_isaac.py --task 4   # Task 4: Walk+Turn (arc)
+```
 
 **Gazebo**:
 ```bash
 ./send_velocity_commands_gazebo.sh
-# Select option 3 for Task 2.2 (Walk normal - 1.0 m/s)
-# Select option 10 for Task 4.1 (Right arc)
+# Quick select: 1, 3, 7, or 10
 ```
 
-**Isaac Lab**:
+| Option | Task | Command |
+|--------|------|---------|
+| 1 | Standing | (0.0, 0.0, 0.0) |
+| 3 | Walk normal | (1.0, 0.0, 0.0) |
+| 7 | Turn normal | (0.0, 0.0, 1.0) |
+| 10 | Walk+Turn | (0.8, 0.0, 0.6) |
+
+### 📋 DETAILED (17 Variants - Comprehensive Testing)
+
+Test all speed/rate variations from training episodes.
+
+**Isaac Lab - All Variants**:
+
 ```bash
-# List all tasks
-python send_velocity_commands_isaac.py --list
+# TASK 1: Standing (1 variant)
+python send_velocity_commands_isaac.py --task 1
 
-# Test specific task
-python send_velocity_commands_isaac.py --task 2.2  # Walk normal
-python send_velocity_commands_isaac.py --task 4.1  # Right arc
+# TASK 2: Walking (5 variants)
+python send_velocity_commands_isaac.py --task 2      # Alias: normal (1.0 m/s)
+python send_velocity_commands_isaac.py --task 2.1    # Slow (0.5 m/s)
+python send_velocity_commands_isaac.py --task 2.2    # Normal (1.0 m/s)
+python send_velocity_commands_isaac.py --task 2.3    # Fast (1.5 m/s)
+python send_velocity_commands_isaac.py --task 2.4    # Moderate (0.8 m/s)
 
-# Custom command
-python send_velocity_commands_isaac.py --linear_x 0.6 --angular_z 0.4
+# TASK 3: Turn in Place (5 variants)
+python send_velocity_commands_isaac.py --task 3      # Alias: normal CCW (1.0 rad/s)
+python send_velocity_commands_isaac.py --task 3.1    # Slow CCW (0.5 rad/s)
+python send_velocity_commands_isaac.py --task 3.2    # Normal CCW (1.0 rad/s)
+python send_velocity_commands_isaac.py --task 3.3    # Normal CW (-1.0 rad/s)
+python send_velocity_commands_isaac.py --task 3.4    # Fast CCW (1.5 rad/s)
+
+# TASK 4: Walk + Turn (5 variants)
+python send_velocity_commands_isaac.py --task 4      # Alias: right arc
+python send_velocity_commands_isaac.py --task 4.1    # Right arc (0.8, 0.6)
+python send_velocity_commands_isaac.py --task 4.2    # Straight fast (1.2, 0.0)
+python send_velocity_commands_isaac.py --task 4.3    # Left arc (0.8, -0.6)
+python send_velocity_commands_isaac.py --task 4.4    # Tight turn (0.5, 1.0)
 ```
 
-**Note**: Isaac Lab requires modifying config file to fix velocities. See script output for instructions.
+**Gazebo - All Variants**:
+
+```bash
+./send_velocity_commands_gazebo.sh
+```
+
+| Option | Task | Description | (vx, vy, wz) |
+|--------|------|-------------|--------------|
+| **1** | **1** | **Standing** ⭐ | (0.0, 0.0, 0.0) |
+| 2 | 2.1 | Walk slow | (0.5, 0.0, 0.0) |
+| **3** | **2.2** | **Walk normal** ⭐ | (1.0, 0.0, 0.0) |
+| 4 | 2.3 | Walk fast | (1.5, 0.0, 0.0) |
+| 5 | 2.4 | Walk moderate | (0.8, 0.0, 0.0) |
+| 6 | 3.1 | Turn slow CCW | (0.0, 0.0, 0.5) |
+| **7** | **3.2** | **Turn normal CCW** ⭐ | (0.0, 0.0, 1.0) |
+| 8 | 3.3 | Turn normal CW | (0.0, 0.0, -1.0) |
+| 9 | 3.4 | Turn fast CCW | (0.0, 0.0, 1.5) |
+| **10** | **4.1** | **Right arc** ⭐ | (0.8, 0.0, 0.6) |
+| 11 | 4.2 | Straight fast | (1.2, 0.0, 0.0) |
+| 12 | 4.3 | Left arc | (0.8, 0.0, -0.6) |
+| 13 | 4.4 | Tight turn | (0.5, 0.0, 1.0) |
+| 14 | - | Custom | (enter values) |
+
+**⭐ = Simplified aliases (options 1, 3, 7, 10)**
+
+### 🔍 Which Should You Use?
+
+**Use SIMPLIFIED (1, 2, 3, 4) when:**
+- ✅ Quick sanity check
+- ✅ Demonstrating the 4 main task categories
+- ✅ Teaching/showing someone
+- ✅ Initial policy validation
+
+**Use DETAILED (2.1, 2.2, 3.3, etc.) when:**
+- ✅ Comprehensive policy testing
+- ✅ Matching exact training episode conditions
+- ✅ Testing performance across speed variations
+- ✅ Research/data collection
+
+### 💡 Pro Tips
+
+**1. List All Available Tasks**:
+```bash
+python send_velocity_commands_isaac.py --list
+```
+
+**2. Gazebo Quick Select**:
+In the menu, just remember:
+- **1** = Standing
+- **3** = Walking
+- **7** = Turning
+- **10** = Walk+Turn
+
+**3. Custom Commands (Advanced)**:
+```bash
+# Isaac Lab - custom velocity
+python send_velocity_commands_isaac.py --linear_x 0.7 --angular_z 0.4
+
+# Gazebo - option 14 for custom input
+./send_velocity_commands_gazebo.sh
+# Select 14, then enter custom values
+```
 
 ---
 
@@ -422,17 +581,6 @@ Applied in MLP-Custom config:
 
 This simplifies deployment and ensures fair actuator comparison.
 
-### 4. Pre-trained Models Included
-
-| Model | Size | Actuator | DR | Status |
-|-------|------|----------|----|---------|
-| **mlp_dr.pt** | 4.4 MB | MLP | ✅ | ⭐ **RECOMMENDED** |
-| mlp.pt | 4.4 MB | MLP | ❌ | Baseline comparison |
-| lstm_dr.pt | 4.4 MB | LSTM | ✅ | Research use |
-| lstm.pt | 4.4 MB | LSTM | ❌ | Ablation study |
-| Implicit_dr.pt | 4.4 MB | Implicit | ✅ | Physics-based |
-| implicit.pt | 4.4 MB | Implicit | ❌ | Baseline |
-
 ---
 
 ## 🛠️ Troubleshooting
@@ -445,8 +593,8 @@ echo $VISTEC_REPO $UNITREE_LAB $VISTEC_WS
 
 # If empty, set them
 export VISTEC_REPO=~/Vistec_Intern_Exam
-export UNITREE_LAB=~/unitree_rl_lab
-export VISTEC_WS=~/vistec_ex_ws
+export UNITREE_LAB=~/Vistec_Intern_Exam/unitree_rl_lab
+export VISTEC_WS=~/Vistec_Intern_Exam/Vistec_ex_ws
 ```
 
 ### Issue 2: verify_setup.sh Fails
@@ -508,7 +656,7 @@ source install/setup.bash
 **Cause**: PD gains mismatch or wrong actuator type
 
 **Solution**:
-1. Verify using MLP actuator: `actuator_type:=mlp`
+1. Verify using MLP actuator
 2. Check PD gains in URDF (should be Kp=25.0, Kd=0.5)
 3. Use MLP-Custom policy (best DR for Gazebo)
 
@@ -527,6 +675,19 @@ nvcc --version
 
 # If missing, install CUDA 11.8 or 12.1
 # https://developer.nvidia.com/cuda-downloads
+```
+
+### Issue 8: ModuleNotFoundError: No module named 'rclpy'
+
+**Cause**: Using conda Python instead of system Python for ROS 2
+
+**Solution**:
+```bash
+# Deactivate conda before running ROS 2 commands
+conda deactivate
+
+# Then run ROS 2 commands
+ros2 launch deploy_policy go2_deploy.launch.py
 ```
 
 ---
@@ -568,19 +729,8 @@ nvcc --version
 
 ## 🔗 Related Resources
 
-### Full Repositories
-
-This repo contains **essential files only**. Full source code:
-
-| Module | This Repo | Full Repository | Env Variable |
-|--------|-----------|-----------------|--------------|
-| **unitree_rl_lab** | Configs, utils | Clone from source | `$UNITREE_LAB` |
-| **Actuator_net** | Pre-trained models | Clone from source | `$ACTUATOR_NET` |
-| **Vistec_ex_ws** | ROS 2 packages | Build from this repo | `$VISTEC_WS` |
-
 ### Helper Documentation
 
-- [COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md) - Comprehensive all-in-one guide
 - `unitree_rl_lab/Configs/README_PATHS.md` - Config path fixes
 - `Vistec_ex_ws/src/deploy_policy/config/README_CONFIG.md` - ROS 2 config guide
 - `verify_setup.sh` - Automated setup verification
@@ -610,7 +760,7 @@ BSD-3-Clause License
 
 **Sim2Sim Quadruped Locomotion Research**
 
-**Last Updated**: 2026-02-11
+**Last Updated**: 2026-02-12
 **Isaac Lab**: 2.3.0 | **ROS 2**: Humble | **Tested**: Ubuntu 22.04, RTX 3090
 
 **Clone & Get Started**: `git clone https://github.com/BhumipatNgamphueak/Vistec_Intern_Exam.git`
