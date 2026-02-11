@@ -1,0 +1,17 @@
+{
+  "name": "multi_amp_50s_hang_down",
+  "created": "2026-02-02T09:10:45.039119",
+  "description": "no",
+  "files": {
+    "csv": "datasets/multi_amp_50s_hang_down/actuator_data.csv",
+    "npz": "datasets/multi_amp_50s_hang_down/actuator_data_isaac_lab.npz"
+  },
+  "source_files": {
+    "csv": "actuator_data_go2_20260202_090326.csv",
+    "npz": "actuator_data_go2_20260202_090326_isaac_lab.npz"
+  },
+  "parameters": {
+    "num_samples": 13704,
+    "num_joints": 12
+  }
+}
