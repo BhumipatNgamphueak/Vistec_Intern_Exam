@@ -10,6 +10,8 @@
 
 **Complete, self-contained Sim2Sim transfer learning package**. Train in Isaac Lab, deploy to Gazebo. No additional repos needed!
 
+**Last Updated**: February 12, 2026
+
 ---
 
 ## 📋 Quick Navigation
@@ -23,7 +25,7 @@
 | [4 Locomotion Tasks](#-4-locomotion-tasks) | Stand, Walk, Turn, Combined |
 | [Velocity Commands](#-velocity-commands-guide) | Simplified & detailed testing |
 | [Troubleshooting](#-troubleshooting) | Common issues & solutions |
-| [Task Names](#-registered-task-names) | All registered Isaac Lab tasks |
+| [Task Names](#-registered-task-names) | All 11 registered Isaac Lab tasks |
 
 ---
 
@@ -212,13 +214,17 @@ Based on `__init__.py`, here are the **CORRECT** task names:
 ### LSTM Actuator Tasks
 3. `Unitree-Go2-Velocity-LSTM-DR` - LSTM with Domain Randomization
 4. `Unitree-Go2-Velocity-LSTM-No-DR` - LSTM without Domain Randomization
+5. `Unitree-Go2-Velocity-LSTM-Custom` - LSTM custom configuration
+6. `Unitree-Go2-Velocity-LSTM-Custom-Enhanced` - LSTM enhanced version
+7. `Unitree-Go2-Velocity-LSTM-MyModel` - LSTM with your trained model
 
 ### Implicit Actuator Tasks
-5. `Unitree-Go2-Velocity-Implicit-DR` - Implicit with Domain Randomization
-6. `Unitree-Go2-Velocity-Implicit` - Implicit without Domain Randomization
+8. `Unitree-Go2-Velocity-Implicit-DR` - Implicit with Domain Randomization
+9. `Unitree-Go2-Velocity-Implicit` - Implicit without Domain Randomization
 
-### Base Task
-7. `Unitree-Go2-Velocity` - Base configuration
+### Base Tasks
+10. `Unitree-Go2-Velocity` - Base configuration
+11. `Unitree-Go2-Velocity-LSTM` - Base LSTM configuration
 
 ### Task Name Pattern
 
@@ -227,8 +233,8 @@ Unitree-Go2-Velocity-[ACTUATOR]-[DR_STATUS]
 ```
 
 Where:
-- `[ACTUATOR]` = MLP-Custom, MLP, LSTM, Implicit
-- `[DR_STATUS]` = DR, No-DR, Custom, or omitted for base
+- `[ACTUATOR]` = MLP-Custom, MLP, LSTM, LSTM-Custom, LSTM-MyModel, Implicit
+- `[DR_STATUS]` = DR, No-DR, Custom, Enhanced, or omitted for base
 
 ---
 
@@ -252,7 +258,7 @@ cd $UNITREE_LAB
 
 ```bash
 # Activate Isaac Lab environment (if using conda)
-conda activate env_isaaclab # Skip if not using conda
+conda activate env_isaaclab  # Skip if not using conda
 
 cd $UNITREE_LAB
 
@@ -276,7 +282,7 @@ cd $UNITREE_LAB
 
 ```bash
 # Activate Isaac Lab environment (if using conda)
-conda activate env_isaaclab   # Skip if not using conda
+conda activate env_isaaclab  # Skip if not using conda
 
 cd $UNITREE_LAB
 
@@ -304,7 +310,7 @@ cd $UNITREE_LAB
 
 ```bash
 # Activate Isaac Lab environment (if using conda)
-conda activate env_isaaclab   # Skip if not using conda
+conda activate env_isaaclab  # Skip if not using conda
 
 cd $UNITREE_LAB
 
@@ -341,7 +347,7 @@ echo "source $VISTEC_WS/install/setup.bash" >> ~/.bashrc
 
 #### Launch Gazebo with Policy (3 Terminals)
 
-**Step 1: Deploy Policy (Terminal 2)**
+**Step 1: Deploy Policy (Terminal 1)**
 
 ```bash
 # Deactivate conda if active
@@ -356,7 +362,11 @@ ros2 launch deploy_policy go2_deploy.launch.py \
   device:=cpu
 ```
 
-**Step 2: Launch Gazebo Fortress (Terminal 1)**
+**Launch Arguments**:
+- `policy_path`: Path to .pt or .onnx model
+- `device`: `cpu` or `cuda` (default: cpu, use `cuda` if GPU available)
+
+**Step 2: Launch Gazebo Fortress (Terminal 2)**
 
 ```bash
 # Deactivate conda if active
@@ -370,10 +380,6 @@ ros2 launch go2_gazebo_simulation go2_fortress.launch.py
 ```
 
 **Expected**: Gazebo opens with Go2 robot spawned
-
-**Launch Arguments**:
-- `policy_path`: Path to .pt or .onnx model
-- `device`: `cpu` or `cuda` (default: cpu, use `cuda` if GPU available)
 
 **Step 3: Send Velocity Commands (Terminal 3)**
 
