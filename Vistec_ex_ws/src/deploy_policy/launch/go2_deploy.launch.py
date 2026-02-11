@@ -25,7 +25,8 @@ def generate_launch_description():
 
     declare_policy_path = DeclareLaunchArgument(
         'policy_path',
-        default_value='/home/drl-68/unitree_rl_lab/logs/rsl_rl/unitree_go2_velocity/latest/model.pt',
+        default_value=os.path.join(os.getenv('VISTEC_REPO', os.path.expanduser('~/Vistec_Intern_Exam')),
+                                   'trained_models', 'mlp_with_dr_24999.pt'),
         description='Path to the trained Go2 policy checkpoint'
     )
 
@@ -49,13 +50,15 @@ def generate_launch_description():
 
     declare_actuator_model_path = DeclareLaunchArgument(
         'actuator_model_path',
-        default_value='/home/drl-68/actuator_net/app/resources/actuator.pth',
+        default_value=os.path.join(os.getenv('ACTUATOR_NET', os.path.expanduser('~/Vistec_Intern_Exam/Actuator_net')),
+                                   'app', 'resources', 'actuator.pth'),
         description='Path to trained MLP actuator network model'
     )
 
     declare_actuator_scaler_path = DeclareLaunchArgument(
         'actuator_scaler_path',
-        default_value='/home/drl-68/actuator_net/app/resources/scaler.pkl',
+        default_value=os.path.join(os.getenv('ACTUATOR_NET', os.path.expanduser('~/Vistec_Intern_Exam/Actuator_net')),
+                                   'app', 'resources', 'scaler.pkl'),
         description='Path to actuator network feature scaler'
     )
 

@@ -44,7 +44,8 @@ def generate_launch_description():
     )
 
     # Read URDF file and replace package:// URIs with absolute paths
-    go2_description_path = '/home/drl-68/unitree_rl_lab/unitree_ros/robots/go2_description'
+    unitree_lab_path = os.getenv('UNITREE_LAB', os.path.expanduser('~/Vistec_Intern_Exam/unitree_rl_lab'))
+    go2_description_path = os.path.join(unitree_lab_path, 'unitree_ros', 'robots', 'go2_description')
     with open(urdf_file, 'r') as f:
         urdf_content = f.read()
     urdf_content = urdf_content.replace(

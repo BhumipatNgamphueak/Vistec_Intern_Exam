@@ -1,8 +1,8 @@
 """
 Configuration for Go2 velocity tracking with YOUR CUSTOM TRAINED LSTM actuator.
 
-This configuration uses your newly trained LSTM model from actuator_net:
-/home/drl-68/actuator_net/app/resources/actuator_lstm.pth
+This configuration uses your newly trained LSTM model from:
+unitree_rl_lab/source/.../assets/actuator_models/actuator_lstm.pth
 
 COMPREHENSIVE DOMAIN RANDOMIZATION for Sim-to-Real Transfer:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -48,8 +48,8 @@ from isaaclab.utils.noise import UniformNoiseCfg as Unoise
 class MyLSTMActuatorCfg(unitree_actuators.LSTMActuatorNetworkCfg):
     """Your custom trained LSTM actuator from actuator_net."""
 
-    # Point to YOUR newly trained LSTM model
-    network_file = "/home/drl-68/actuator_net/app/resources/actuator_lstm.pth"
+    # Point to YOUR newly trained LSTM model (relative path from this file)
+    network_file = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "assets", "actuator_models", "actuator_lstm.pth")
 
     # LSTM architecture (must match your training)
     # Check your actuator_net training config if these differ

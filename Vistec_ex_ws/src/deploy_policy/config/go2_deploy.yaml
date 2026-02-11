@@ -4,8 +4,9 @@
 go2_policy_deploy_node:
   ros__parameters:
     # Path to the trained policy checkpoint
-    # Update this path when you have a trained Go2 model
-    policy_path: "/home/drl-68/unitree_rl_lab/logs/rsl_rl/unitree_go2_velocity/latest/model.pt"
+    # Default: Use pre-trained MLP policy from repo
+    # Update to your own trained model path if needed
+    policy_path: "~/Vistec_Intern_Exam/trained_models/mlp_with_dr_24999.pt"
 
     # Device for inference ("cpu" or "cuda")
     device: "cpu"

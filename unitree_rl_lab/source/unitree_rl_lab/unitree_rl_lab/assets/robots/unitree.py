@@ -17,8 +17,17 @@ from isaaclab.utils import configclass
 
 from unitree_rl_lab.assets.robots import unitree_actuators
 
-UNITREE_MODEL_DIR = "/home/drl-68/robot_lab_4.5.0/source/robot_lab/data/Robots/Unitree"
-UNITREE_ROS_DIR = "path/to/unitree_ros"  # Replace with the actual path to your unitree_ros package
+# Use environment variable or fallback to IsaacLab extension data directory
+# Users should set ISAACLAB_PATH to their IsaacLab installation
+UNITREE_MODEL_DIR = os.getenv(
+    "UNITREE_MODEL_DIR",
+    os.path.join(os.getenv("ISAACLAB_PATH", os.path.expanduser("~/IsaacLab")),
+                 "source/extensions/omni.isaac.lab_assets/data/Robots/Unitree")
+)
+UNITREE_ROS_DIR = os.path.join(
+    os.getenv("UNITREE_LAB", os.path.expanduser("~/Vistec_Intern_Exam/unitree_rl_lab")),
+    "unitree_ros"
+)
 
 
 @configclass

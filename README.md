@@ -8,7 +8,11 @@
 [![Gazebo](https://img.shields.io/badge/Gazebo-Ignition-orange)](https://gazebosim.org/)
 [![Python](https://img.shields.io/badge/Python-3.10-blue)](https://www.python.org/)
 
-This repository provides **essential configuration files, pre-trained models, and deployment scripts** for reproducing Sim2Sim transfer learning research on quadruped robots.
+This repository is a **complete, self-contained package** with everything needed for Sim2Sim transfer learning research on quadruped robots. No additional cloning required!
+
+> 🚀 **NEW USER? START HERE**: [COMPLETE_USER_GUIDE.md](COMPLETE_USER_GUIDE.md) - Step-by-step guide from clone to running policies (30 minutes)
+>
+> 📘 **Migration Guide**: [SELF_CONTAINED_REPOSITORY.md](SELF_CONTAINED_REPOSITORY.md) - Detailed structure explanation
 
 ---
 

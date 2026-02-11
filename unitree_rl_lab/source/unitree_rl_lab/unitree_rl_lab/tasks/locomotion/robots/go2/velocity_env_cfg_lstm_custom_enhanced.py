@@ -4,6 +4,7 @@ WITH ENHANCED DOMAIN RANDOMIZATION for better sim-to-real transfer.
 """
 
 import math
+import os
 from isaaclab.utils import configclass
 from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import SceneEntityCfg
@@ -24,8 +25,8 @@ from unitree_rl_lab.tasks.locomotion import mdp
 class CustomLSTMActuatorCfg(unitree_actuators.LSTMActuatorNetworkCfg):
     """Custom LSTM actuator using your trained model."""
 
-    # Point to YOUR custom trained model
-    network_file = "/home/drl-68/actuator_net/app/resources/actuator_lstm.pth"
+    # Point to YOUR custom trained model (relative path from this file)
+    network_file = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "assets", "actuator_models", "actuator_lstm.pth")
 
     # LSTM architecture (must match your training in train_lstm.py)
     # Input: 6 features (same as MLP) - no sequence needed
