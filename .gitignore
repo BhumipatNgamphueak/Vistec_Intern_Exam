@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ROS 2
+install/
+build/
+log/
+*.bag
+
+# Logs and databases
+*.log
+*.sqlite
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Model checkpoints (too large for git)
+# Note: Pre-trained models in trained_models/ are intentionally tracked
+*.pt.bak
+*.ckpt
+
+# Data files (too large)
+*.npz
+*.csv
+chirp_data_*/
+data_*/
+
+# Compiled
+*.pyc
+*.pyo
