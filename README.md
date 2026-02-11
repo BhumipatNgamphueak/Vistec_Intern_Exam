@@ -58,19 +58,19 @@ Vistec_Intern_Exam/
 ┌───────────────────────────────────────────────────────────┐
 │  STAGE 1: Policy Training (IsaacLab PhysX)               │
 │  • Configs: unitree_rl_lab/Configs/                      │
-│  • Full repo: /home/drl-68/unitree_rl_lab/              │
+│  • Full repo: $UNITREE_LAB (clone from source)           │
 └───────────────────────────────────────────────────────────┘
                           ↓
 ┌───────────────────────────────────────────────────────────┐
 │  STAGE 2: Actuator Modeling (Neural Networks)            │
 │  • Models: Actuator_net/app/resources/*.pth              │
-│  • Full repo: /home/drl-68/actuator_net/                │
+│  • Full repo: $ACTUATOR_NET (clone from source)          │
 └───────────────────────────────────────────────────────────┘
                           ↓
 ┌───────────────────────────────────────────────────────────┐
 │  STAGE 3: Gazebo Deployment (ROS 2)                      │
-│  • Workspace: Vistec_ex_ws/src/                          │
-│  • Full repo: /home/drl-68/vistec_ex_ws/                │
+│  • Workspace: $VISTEC_WS (build from this repo)          │
+│  • Packages: Vistec_ex_ws/src/                           │
 └───────────────────────────────────────────────────────────┘
 ```
 
@@ -91,17 +91,34 @@ source /opt/ros/humble/setup.bash
 nvidia-smi
 ```
 
+### Setup Environment Variables
+
+```bash
+# Set workspace paths (adjust to your clone location)
+export VISTEC_REPO=~/Vistec_Intern_Exam              # This cloned repo
+export UNITREE_LAB=~/unitree_rl_lab                   # Full training repo
+export ACTUATOR_NET=~/actuator_net                    # Actuator models repo
+export VISTEC_WS=~/vistec_ex_ws                       # ROS 2 workspace
+
+# Add to ~/.bashrc for persistence
+echo "export VISTEC_REPO=~/Vistec_Intern_Exam" >> ~/.bashrc
+echo "export UNITREE_LAB=~/unitree_rl_lab" >> ~/.bashrc
+echo "export ACTUATOR_NET=~/actuator_net" >> ~/.bashrc
+echo "export VISTEC_WS=~/vistec_ex_ws" >> ~/.bashrc
+```
+
 ### STEP 1: Training in IsaacLab
 
 ```bash
-# Navigate to full training repository
-cd /home/drl-68/unitree_rl_lab/
+# Navigate to full training repository (clone if needed)
+cd $UNITREE_LAB
+# OR: git clone <unitree_rl_lab_repo> && cd unitree_rl_lab
 
 # Install unitree_rl_lab
 ~/IsaacLab/isaaclab.sh -p -m pip install -e source/unitree_rl_lab
 
 # Copy configuration from this repo
-cp /home/drl-68/Vistec_Intern_Exam/unitree_rl_lab/Configs/velocity_env_cfg_mlp_custom.py \
+cp $VISTEC_REPO/unitree_rl_lab/Configs/velocity_env_cfg_mlp_custom.py \
    source/unitree_rl_lab/unitree_rl_lab/tasks/locomotion/robots/go2/
 
 # Train policy (6-8 hours on RTX 3090)
@@ -111,20 +128,20 @@ python scripts/rsl_rl/train.py \
     --headless
 ```
 
-**Training produces**: `logs/rsl_rl/unitree_go2_velocity_mlp_custom/{timestamp}/model_*.pt`
+**Training produces**: `$UNITREE_LAB/logs/rsl_rl/unitree_go2_velocity_mlp_custom/{timestamp}/model_*.pt`
 
 ### STEP 2: Actuator Validation (Optional)
 
 ```bash
 # Test actuators with chirp signal
-cd /home/drl-68/unitree_rl_lab/
-cp /home/drl-68/Vistec_Intern_Exam/unitree_rl_lab/Testing_Scripts/test_chirp_all_actuators.py ./
+cd $UNITREE_LAB
+cp $VISTEC_REPO/unitree_rl_lab/Testing_Scripts/test_chirp_all_actuators.py ./
 
 # Run chirp test
 python test_chirp_all_actuators.py --actuator mlp --headless
 
 # Compare with Gazebo (after running Gazebo chirp)
-cp /home/drl-68/Vistec_Intern_Exam/unitree_rl_lab/Testing_Scripts/compare_chirp_isaac_gazebo.py ./
+cp $VISTEC_REPO/unitree_rl_lab/Testing_Scripts/compare_chirp_isaac_gazebo.py ./
 python compare_chirp_isaac_gazebo.py \
     --isaac chirp_data_isaaclab/*.npz \
     --gazebo chirp_data_gazebo/*.csv
@@ -134,23 +151,24 @@ python compare_chirp_isaac_gazebo.py \
 
 ```bash
 # Test policy (automatically exports to ONNX/JIT)
-cd /home/drl-68/unitree_rl_lab/
+cd $UNITREE_LAB
 python scripts/rsl_rl/play.py \
     --task Unitree-Go2-Velocity-MLP-Custom \
     --num_envs 32 \
     --load_run {timestamp}
 
-# Exported to: logs/rsl_rl/.../exported/policy.onnx
+# Exported to: $UNITREE_LAB/logs/rsl_rl/.../exported/policy.onnx
 ```
 
 ### STEP 4: Deploy to Gazebo
 
 ```bash
-# Setup ROS 2 workspace
-cd /home/drl-68/vistec_ex_ws/
+# Setup ROS 2 workspace (first time only)
+mkdir -p $VISTEC_WS/src
+cd $VISTEC_WS
 
-# Copy ROS 2 packages from this repo (if needed)
-cp -r /home/drl-68/Vistec_Intern_Exam/Vistec_ex_ws/src/* src/
+# Copy ROS 2 packages from this repo
+cp -r $VISTEC_REPO/Vistec_ex_ws/src/* src/
 
 # Build workspace
 colcon build --symlink-install
@@ -158,7 +176,12 @@ source install/setup.bash
 
 # Launch Gazebo with policy
 ros2 launch deploy_policy go2_rl_policy.launch.py \
-    policy_path:=/home/drl-68/unitree_rl_lab/logs/.../exported/policy.onnx \
+    policy_path:=$UNITREE_LAB/logs/rsl_rl/.../exported/policy.onnx \
+    actuator_type:=mlp
+
+# Or use pre-trained model from this repo
+ros2 launch deploy_policy go2_rl_policy.launch.py \
+    policy_path:=$VISTEC_REPO/trained_models/mlp_with_dr_24999.pt \
     actuator_type:=mlp
 
 # Send velocity commands
@@ -258,37 +281,53 @@ This simplifies Gazebo deployment and ensures fair actuator comparison.
 
 This repository contains **essential configuration and model files**. Full source code:
 
-| Module | Essential Files (This Repo) | Full Repository |
-|--------|----------------------------|-----------------|
-| **unitree_rl_lab** | Configs, utils, test scripts | `/home/drl-68/unitree_rl_lab/` |
-| **Actuator_net** | Pre-trained models, training scripts | `/home/drl-68/actuator_net/` |
-| **Vistec_ex_ws** | ROS 2 packages | `/home/drl-68/vistec_ex_ws/` |
+| Module | Essential Files (This Repo) | Full Repository | Environment Variable |
+|--------|----------------------------|-----------------|---------------------|
+| **unitree_rl_lab** | Configs, utils, test scripts | Clone from source | `$UNITREE_LAB` |
+| **Actuator_net** | Pre-trained models, training scripts | Clone from source | `$ACTUATOR_NET` |
+| **Vistec_ex_ws** | ROS 2 packages | Build from this repo | `$VISTEC_WS` |
+
+**Note**: Set environment variables as shown in [Setup Environment Variables](#setup-environment-variables)
 
 ---
 
 ## 🛠️ Troubleshooting
 
-### Issue 1: Config Not Found
+### Issue 1: Environment Variables Not Set
+
+```bash
+# Check if variables are set
+echo $VISTEC_REPO $UNITREE_LAB $ACTUATOR_NET $VISTEC_WS
+
+# If empty, set them (adjust paths to your setup)
+export VISTEC_REPO=~/Vistec_Intern_Exam
+export UNITREE_LAB=~/unitree_rl_lab
+export ACTUATOR_NET=~/actuator_net
+export VISTEC_WS=~/vistec_ex_ws
+```
+
+### Issue 2: Config Not Found
 
 ```bash
 # Copy config to full repository
-cp unitree_rl_lab/Configs/velocity_env_cfg_mlp_custom.py \
-   /home/drl-68/unitree_rl_lab/source/unitree_rl_lab/unitree_rl_lab/tasks/locomotion/robots/go2/
+cp $VISTEC_REPO/unitree_rl_lab/Configs/velocity_env_cfg_mlp_custom.py \
+   $UNITREE_LAB/source/unitree_rl_lab/unitree_rl_lab/tasks/locomotion/robots/go2/
 ```
 
-### Issue 2: Actuator Model Not Loaded
+### Issue 3: Actuator Model Not Loaded
 
 ```bash
 # Copy models to Isaac Lab assets
-cp Actuator_net/app/resources/*.pth \
-   /home/drl-68/unitree_rl_lab/source/unitree_rl_lab/unitree_rl_lab/assets/actuator_models/
+mkdir -p $UNITREE_LAB/source/unitree_rl_lab/unitree_rl_lab/assets/actuator_models/
+cp $VISTEC_REPO/Actuator_net/app/resources/*.pth \
+   $UNITREE_LAB/source/unitree_rl_lab/unitree_rl_lab/assets/actuator_models/
 ```
 
-### Issue 3: ROS 2 Package Build Fails
+### Issue 4: ROS 2 Package Build Fails
 
 ```bash
 # Install dependencies
-cd /home/drl-68/vistec_ex_ws/
+cd $VISTEC_WS
 rosdep install --from-paths src --ignore-src -r -y
 colcon build
 ```
