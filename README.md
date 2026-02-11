@@ -214,17 +214,10 @@ Based on `__init__.py`, here are the **CORRECT** task names:
 ### LSTM Actuator Tasks
 3. `Unitree-Go2-Velocity-LSTM-DR` - LSTM with Domain Randomization
 4. `Unitree-Go2-Velocity-LSTM-No-DR` - LSTM without Domain Randomization
-5. `Unitree-Go2-Velocity-LSTM-Custom` - LSTM custom configuration
-6. `Unitree-Go2-Velocity-LSTM-Custom-Enhanced` - LSTM enhanced version
-7. `Unitree-Go2-Velocity-LSTM-MyModel` - LSTM with your trained model
 
 ### Implicit Actuator Tasks
-8. `Unitree-Go2-Velocity-Implicit-DR` - Implicit with Domain Randomization
-9. `Unitree-Go2-Velocity-Implicit` - Implicit without Domain Randomization
-
-### Base Tasks
-10. `Unitree-Go2-Velocity` - Base configuration
-11. `Unitree-Go2-Velocity-LSTM` - Base LSTM configuration
+5. `Unitree-Go2-Velocity-Implicit-DR` - Implicit with Domain Randomization
+6. `Unitree-Go2-Velocity-Implicit` - Implicit without Domain Randomization
 
 ### Task Name Pattern
 
@@ -579,12 +572,7 @@ Applied in MLP-Custom config:
 14. **Spawn Position**: 0-0.3m height variation
 15. **Terrain Variation**: Ground irregularities
 
-### 3. Unified PD Gains
-
-**All actuators use identical gains**:
-- Kp = 25.0 (Stiffness)
-- Kd = 0.5 (Damping)
-
+#
 This simplifies deployment and ensures fair actuator comparison.
 
 ---
