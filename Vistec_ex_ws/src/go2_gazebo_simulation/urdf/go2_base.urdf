@@ -1,0 +1,649 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="go2_description">
+
+  <!-- World link for fixed mounting - DISABLED for free movement -->
+  <!-- <link name="world"/> -->
+
+  <!-- Fixed joint - robot hanging from sky - DISABLED for free movement -->
+  <!--
+  <joint name="fixed_base_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base"/>
+    <origin xyz="0 0 0.5" rpy="0 0 0"/>
+  </joint>
+  -->
+
+  <link name="base">
+    <inertial>
+      <origin xyz="0.021112 0 -0.005366" rpy="0 0 0" />
+      <mass value="6.921" />
+      <inertia ixx="0.02448" ixy="0.00012166" ixz="0.0014849" iyy="0.098077" iyz="-3.12E-05" izz="0.107" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/base.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <box size="0.3762 0.0935 0.114" />
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Front Left Leg -->
+  <link name="FL_hip">
+    <inertial>
+      <origin xyz="-0.0054 0.00194 -0.000105" rpy="0 0 0" />
+      <mass value="0.678" />
+      <inertia ixx="0.00048" ixy="-3.01E-06" ixz="1.11E-06" iyy="0.000884" iyz="-1.42E-06" izz="0.000596" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/hip.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 0.08 0" />
+      <geometry>
+        <cylinder length="0.04" radius="0.046" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FL_hip_joint" type="revolute">
+    <origin xyz="0.1934 0.0465 0" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="FL_hip" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.0472" upper="1.0472" effort="23.7" velocity="25.6" />
+    <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="FL_thigh">
+    <inertial>
+      <origin xyz="-0.00374 -0.0223 -0.0327" rpy="0 0 0" />
+      <mass value="1.152" />
+      <inertia ixx="0.00584" ixy="8.72E-05" ixz="-0.000289" iyy="0.0058" iyz="0.000808" izz="0.00103" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/thigh.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065" />
+      <geometry>
+        <box size="0.213 0.0245 0.034" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FL_thigh_joint" type="revolute">
+    <origin xyz="0 0.0955 0" rpy="0 0 0" />
+    <parent link="FL_hip" />
+    <child link="FL_thigh" />
+    <axis xyz="0 1 0" />
+    <limit lower="-1.5708" upper="3.4907" effort="23.7" velocity="25.6" />
+    <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="FL_calf">
+    <inertial>
+      <origin xyz="0.00548 -0.000975 -0.115" rpy="0 0 0" />
+      <mass value="0.154" />
+      <inertia ixx="0.00108" ixy="3.4E-07" ixz="1.72E-05" iyy="0.0011" iyz="8.28E-06" izz="3.29E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/calf.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 -0.21 0" xyz="0.008 0 -0.06" />
+      <geometry>
+        <cylinder length="0.12" radius="0.012" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FL_calf_joint" type="revolute">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="FL_thigh" />
+    <child link="FL_calf" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.7227" upper="-0.83776" effort="45.43" velocity="13.3" />
+    <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="FL_foot">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia ixx="9.6e-06" ixy="0" ixz="0" iyy="9.6e-06" iyz="0" izz="9.6e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/foot.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.002 0 0" />
+      <geometry>
+        <sphere radius="0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FL_foot_joint" type="fixed">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="FL_calf" />
+    <child link="FL_foot" />
+  </joint>
+
+  <!-- Front Right Leg -->
+  <link name="FR_hip">
+    <inertial>
+      <origin xyz="-0.0054 -0.00194 -0.000105" rpy="0 0 0" />
+      <mass value="0.678" />
+      <inertia ixx="0.00048" ixy="3.01E-06" ixz="1.11E-06" iyy="0.000884" iyz="1.42E-06" izz="0.000596" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="3.1415 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/hip.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 -0.08 0" />
+      <geometry>
+        <cylinder length="0.04" radius="0.046" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FR_hip_joint" type="revolute">
+    <origin xyz="0.1934 -0.0465 0" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="FR_hip" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.0472" upper="1.0472" effort="23.7" velocity="25.6" />
+    <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="FR_thigh">
+    <inertial>
+      <origin xyz="-0.00374 0.0223 -0.0327" rpy="0 0 0" />
+      <mass value="1.152" />
+      <inertia ixx="0.00584" ixy="-8.72E-05" ixz="-0.000289" iyy="0.0058" iyz="-0.000808" izz="0.00103" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/thigh_mirror.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065" />
+      <geometry>
+        <box size="0.213 0.0245 0.034" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FR_thigh_joint" type="revolute">
+    <origin xyz="0 -0.0955 0" rpy="0 0 0" />
+    <parent link="FR_hip" />
+    <child link="FR_thigh" />
+    <axis xyz="0 1 0" />
+    <limit lower="-1.5708" upper="3.4907" effort="23.7" velocity="25.6" />
+    <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="FR_calf">
+    <inertial>
+      <origin xyz="0.00548 0.000975 -0.115" rpy="0 0 0" />
+      <mass value="0.154" />
+      <inertia ixx="0.00108" ixy="-3.4E-07" ixz="1.72E-05" iyy="0.0011" iyz="-8.28E-06" izz="3.29E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/calf_mirror.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 -0.2 0" xyz="0.01 0 -0.06" />
+      <geometry>
+        <cylinder length="0.12" radius="0.013" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FR_calf_joint" type="revolute">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="FR_thigh" />
+    <child link="FR_calf" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.7227" upper="-0.83776" effort="45.43" velocity="13.3" />
+    <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="FR_foot">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia ixx="9.6e-06" ixy="0" ixz="0" iyy="9.6e-06" iyz="0" izz="9.6e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/foot.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.002 0 0" />
+      <geometry>
+        <sphere radius="0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FR_foot_joint" type="fixed">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="FR_calf" />
+    <child link="FR_foot" />
+  </joint>
+
+  <!-- Rear Left Leg -->
+  <link name="RL_hip">
+    <inertial>
+      <origin xyz="0.0054 0.00194 -0.000105" rpy="0 0 0" />
+      <mass value="0.678" />
+      <inertia ixx="0.00048" ixy="3.01E-06" ixz="-1.11E-06" iyy="0.000884" iyz="-1.42E-06" izz="0.000596" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 3.1415 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/hip.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 0.08 0" />
+      <geometry>
+        <cylinder length="0.04" radius="0.046" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RL_hip_joint" type="revolute">
+    <origin xyz="-0.1934 0.0465 0" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="RL_hip" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.0472" upper="1.0472" effort="23.7" velocity="25.6" />
+    <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="RL_thigh">
+    <inertial>
+      <origin xyz="-0.00374 -0.0223 -0.0327" rpy="0 0 0" />
+      <mass value="1.152" />
+      <inertia ixx="0.00584" ixy="8.72E-05" ixz="-0.000289" iyy="0.0058" iyz="0.000808" izz="0.00103" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/thigh.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065" />
+      <geometry>
+        <box size="0.213 0.0245 0.034" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RL_thigh_joint" type="revolute">
+    <origin xyz="0 0.0955 0" rpy="0 0 0" />
+    <parent link="RL_hip" />
+    <child link="RL_thigh" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.5236" upper="4.5379" effort="23.7" velocity="25.6" />
+    <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="RL_calf">
+    <inertial>
+      <origin xyz="0.00548 -0.000975 -0.115" rpy="0 0 0" />
+      <mass value="0.154" />
+      <inertia ixx="0.00108" ixy="3.4E-07" ixz="1.72E-05" iyy="0.0011" iyz="8.28E-06" izz="3.29E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/calf.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 -0.2 0" xyz="0.01 0 -0.06" />
+      <geometry>
+        <cylinder length="0.12" radius="0.013" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RL_calf_joint" type="revolute">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="RL_thigh" />
+    <child link="RL_calf" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.7227" upper="-0.83776" effort="45.43" velocity="13.3" />
+    <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="RL_foot">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia ixx="9.6e-06" ixy="0" ixz="0" iyy="9.6e-06" iyz="0" izz="9.6e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/foot.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.002 0 0" />
+      <geometry>
+        <sphere radius="0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RL_foot_joint" type="fixed">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="RL_calf" />
+    <child link="RL_foot" />
+  </joint>
+
+  <!-- Rear Right Leg -->
+  <link name="RR_hip">
+    <inertial>
+      <origin xyz="0.0054 -0.00194 -0.000105" rpy="0 0 0" />
+      <mass value="0.678" />
+      <inertia ixx="0.00048" ixy="-3.01E-06" ixz="-1.11E-06" iyy="0.000884" iyz="1.42E-06" izz="0.000596" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="3.1415 3.1415 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/hip.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 -0.08 0" />
+      <geometry>
+        <cylinder length="0.04" radius="0.046" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RR_hip_joint" type="revolute">
+    <origin xyz="-0.1934 -0.0465 0" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="RR_hip" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.0472" upper="1.0472" effort="23.7" velocity="25.6" />
+     <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="RR_thigh">
+    <inertial>
+      <origin xyz="-0.00374 0.0223 -0.0327" rpy="0 0 0" />
+      <mass value="1.152" />
+      <inertia ixx="0.00584" ixy="-8.72E-05" ixz="-0.000289" iyy="0.0058" iyz="-0.000808" izz="0.00103" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/thigh_mirror.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065" />
+      <geometry>
+        <box size="0.213 0.0245 0.034" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RR_thigh_joint" type="revolute">
+    <origin xyz="0 -0.0955 0" rpy="0 0 0" />
+    <parent link="RR_hip" />
+    <child link="RR_thigh" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.5236" upper="4.5379" effort="23.7" velocity="25.6" />
+     <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="RR_calf">
+    <inertial>
+      <origin xyz="0.00548 0.000975 -0.115" rpy="0 0 0" />
+      <mass value="0.154" />
+      <inertia ixx="0.00108" ixy="-3.4E-07" ixz="1.72E-05" iyy="0.0011" iyz="-8.28E-06" izz="3.29E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/calf_mirror.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 -0.2 0" xyz="0.01 0 -0.06" />
+      <geometry>
+        <cylinder length="0.12" radius="0.013" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RR_calf_joint" type="revolute">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="RR_thigh" />
+    <child link="RR_calf" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.7227" upper="-0.83776" effort="45.43" velocity="13.3" />
+     <dynamics damping="0.5" friction="0.01" stiffness="25.0" />
+  </joint>
+
+  <link name="RR_foot">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia ixx="9.6e-06" ixy="0" ixz="0" iyy="9.6e-06" iyz="0" izz="9.6e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://go2_gazebo_simulation/dae/foot.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="-0.002 0 0" />
+      <geometry>
+        <sphere radius="0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RR_foot_joint" type="fixed">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="RR_calf" />
+    <child link="RR_foot" />
+  </joint>
+
+  <!-- IMU Sensor -->
+  <link name="imu_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.001" />
+      <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9" />
+    </inertial>
+  </link>
+  <joint name="imu_joint" type="fixed">
+    <origin xyz="-0.02557 0 0.04232" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="imu_link" />
+  </joint>
+
+  <!-- Gazebo IMU Plugin -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-imu-system" name="ignition::gazebo::systems::Imu">
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>200</update_rate>
+      <topic>imu</topic>
+      <imu>
+        <angular_velocity>
+          <x><noise type="none"/></x>
+          <y><noise type="none"/></y>
+          <z><noise type="none"/></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="none"/></x>
+          <y><noise type="none"/></y>
+          <z><noise type="none"/></z>
+        </linear_acceleration>
+      </imu>
+    </sensor>
+  </gazebo>
+
+  <!-- Joint State Publisher Plugin -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-joint-state-publisher-system"
+            name="ignition::gazebo::systems::JointStatePublisher">
+      <joint_name>FL_hip_joint</joint_name>
+      <joint_name>FL_thigh_joint</joint_name>
+      <joint_name>FL_calf_joint</joint_name>
+      <joint_name>FR_hip_joint</joint_name>
+      <joint_name>FR_thigh_joint</joint_name>
+      <joint_name>FR_calf_joint</joint_name>
+      <joint_name>RL_hip_joint</joint_name>
+      <joint_name>RL_thigh_joint</joint_name>
+      <joint_name>RL_calf_joint</joint_name>
+      <joint_name>RR_hip_joint</joint_name>
+      <joint_name>RR_thigh_joint</joint_name>
+      <joint_name>RR_calf_joint</joint_name>
+    </plugin>
+  </gazebo>
+
+  <!-- Odometry Publisher Plugin (Ground Truth) -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-odometry-publisher-system"
+            name="ignition::gazebo::systems::OdometryPublisher">
+      <odom_frame>world</odom_frame>
+      <robot_base_frame>base</robot_base_frame>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <odom_topic>/odom</odom_topic>
+    </plugin>
+  </gazebo>
+
+  <!-- Pose Publisher Plugin (Ground Truth Position) -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-pose-publisher-system"
+            name="ignition::gazebo::systems::PosePublisher">
+      <publish_link_pose>true</publish_link_pose>
+      <publish_sensor_pose>false</publish_sensor_pose>
+      <publish_collision_pose>false</publish_collision_pose>
+      <publish_visual_pose>false</publish_visual_pose>
+      <publish_nested_model_pose>false</publish_nested_model_pose>
+      <use_pose_vector_msg>false</use_pose_vector_msg>
+      <update_frequency>50</update_frequency>
+    </plugin>
+  </gazebo>
+
+  <!-- ApplyJointForce plugins for effort control -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>FL_hip_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>FL_thigh_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>FL_calf_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>FR_hip_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>FR_thigh_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>FR_calf_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>RL_hip_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>RL_thigh_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>RL_calf_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>RR_hip_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>RR_thigh_joint</joint_name>
+    </plugin>
+    <plugin filename="ignition-gazebo-apply-joint-force-system" name="ignition::gazebo::systems::ApplyJointForce">
+      <joint_name>RR_calf_joint</joint_name>
+    </plugin>
+  </gazebo>
+
+  <!-- JointPositionController plugins removed - using direct torque control from RL policy -->
+
+  <!-- Set initial joint positions matching Isaac Lab training config (unitree.py) -->
+  <!-- Pattern: R_hip=-0.1, L_hip=0.1, F_thigh=0.8, R_thigh=1.0, calf=-1.5 -->
+
+  <!-- Front Left (FL) -->
+  <gazebo reference="FL_hip_joint">
+    <initial_position>0.1</initial_position>
+  </gazebo>
+  <gazebo reference="FL_thigh_joint">
+    <initial_position>0.8</initial_position>
+  </gazebo>
+  <gazebo reference="FL_calf_joint">
+    <initial_position>-1.5</initial_position>
+  </gazebo>
+
+  <!-- Front Right (FR) -->
+  <gazebo reference="FR_hip_joint">
+    <initial_position>-0.1</initial_position>
+  </gazebo>
+  <gazebo reference="FR_thigh_joint">
+    <initial_position>0.8</initial_position>
+  </gazebo>
+  <gazebo reference="FR_calf_joint">
+    <initial_position>-1.5</initial_position>
+  </gazebo>
+
+  <!-- Rear Left (RL) -->
+  <gazebo reference="RL_hip_joint">
+    <initial_position>0.1</initial_position>
+  </gazebo>
+  <gazebo reference="RL_thigh_joint">
+    <initial_position>1.0</initial_position>
+  </gazebo>
+  <gazebo reference="RL_calf_joint">
+    <initial_position>-1.5</initial_position>
+  </gazebo>
+
+  <!-- Rear Right (RR) -->
+  <gazebo reference="RR_hip_joint">
+    <initial_position>-0.1</initial_position>
+  </gazebo>
+  <gazebo reference="RR_thigh_joint">
+    <initial_position>1.0</initial_position>
+  </gazebo>
+  <gazebo reference="RR_calf_joint">
+    <initial_position>-1.5</initial_position>
+  </gazebo>
+
+</robot>

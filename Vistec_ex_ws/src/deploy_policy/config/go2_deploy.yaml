@@ -1,0 +1,49 @@
+# Configuration for Go2 policy deployment
+# Parameters match IsaacLab training configuration
+
+go2_policy_deploy_node:
+  ros__parameters:
+    # Path to the trained policy checkpoint
+    # Update this path when you have a trained Go2 model
+    policy_path: "/home/drl-68/unitree_rl_lab/logs/rsl_rl/unitree_go2_velocity/latest/model.pt"
+
+    # Device for inference ("cpu" or "cuda")
+    device: "cpu"
+
+    # Control frequency in Hz
+    # IsaacLab: dt=0.005s, decimation=4 -> control at 50 Hz
+    control_frequency: 50.0
+
+    # Use simulation time
+    use_sim_time: true
+
+# IsaacLab Training Configuration Reference (from velocity_env_cfg.py):
+# =====================================================================
+# Physics:
+#   - sim.dt: 0.005s
+#   - decimation: 4
+#   - Control frequency: 50 Hz
+#
+# Actuator (GO2HV from unitree.py):
+#   - stiffness (Kp): 25.0
+#   - damping (Kd): 0.5
+#   - friction: 0.01
+#
+# Action:
+#   - scale: 0.25
+#   - use_default_offset: True
+#
+# Observation scales:
+#   - base_ang_vel: 0.2
+#   - joint_vel_rel: 0.05
+#
+# Default joint positions:
+#   - FR_hip: -0.1, FR_thigh: 0.8, FR_calf: -1.5
+#   - FL_hip: 0.1, FL_thigh: 0.8, FL_calf: -1.5
+#   - RR_hip: -0.1, RR_thigh: 1.0, RR_calf: -1.5
+#   - RL_hip: 0.1, RL_thigh: 1.0, RL_calf: -1.5
+#
+# Velocity command limits:
+#   - lin_vel_x: (-1.0, 1.0) m/s
+#   - lin_vel_y: (-0.4, 0.4) m/s
+#   - ang_vel_z: (-1.0, 1.0) rad/s
