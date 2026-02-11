@@ -55,16 +55,25 @@ Vistec_Intern_Exam/
 │   ├── implicit_no_dr_latest.pt       # Implicit without DR
 │   └── lstm_dr_25000.pt               # LSTM + DR
 │
-├── unitree_rl_lab/                    # Training configurations
-│   ├── Configs/                       # 12 task configs
-│   │   ├── velocity_env_cfg_mlp_custom.py        # MLP + DR ⭐
-│   │   ├── velocity_env_cfg_implicit_with_dr.py  # Implicit + DR
-│   │   ├── velocity_env_cfg_lstm_with_dr.py      # LSTM + DR
-│   │   ├── README_PATHS.md            # Path configuration guide
-│   │   └── [9 more configs]
-│   ├── Utils/                         # 6 utility scripts
-│   ├── Testing_Scripts/               # Chirp tests, comparisons
-│   └── Policy_Playback/               # Policy playback utilities
+├── unitree_rl_lab/                    # ⭐ COMPLETE Isaac Lab framework
+│   ├── source/                        # Framework source code
+│   │   └── unitree_rl_lab/
+│   │       └── unitree_rl_lab/
+│   │           ├── assets/            # Robot definitions, actuator models
+│   │           ├── tasks/             # Environment implementations (Go2, H1, G1)
+│   │           └── utils/             # Core utilities
+│   ├── scripts/                       # Training & testing scripts
+│   │   ├── rsl_rl/                    # train.py, play.py
+│   │   ├── actuator_comparison/       # Comparison tools
+│   │   ├── data_collection/           # Data loggers
+│   │   └── motor_testing/             # Motor tests
+│   ├── Configs/                       # 12 custom task configs
+│   ├── Utils/                         # Episode generators
+│   ├── Testing_Scripts/               # Chirp tests
+│   ├── Policy_Playback/               # Custom playback
+│   ├── deploy/                        # Real robot deployment (C++)
+│   ├── docker/                        # Docker setup
+│   └── unitree_rl_lab.sh              # Setup script
 │
 ├── Actuator_net/                      # Pre-trained actuator models
 │   ├── train.py, train_lstm.py        # Training scripts
@@ -80,6 +89,15 @@ Vistec_Intern_Exam/
         │   └── config/README_CONFIG.md
         └── go2_gazebo_simulation/     # Gazebo simulation setup
 ```
+
+> **📌 IMPORTANT**: This repository is **SELF-CONTAINED** with everything you need:
+> - ✅ Complete Isaac Lab framework (source/, scripts/)
+> - ✅ Pre-trained policies (22 MB)
+> - ✅ Actuator models (LSTM, MLP, Implicit)
+> - ✅ 12 custom training configurations
+> - ✅ ROS 2 deployment workspace
+>
+> **No additional cloning required!** Just clone and run.
 
 ---
 
@@ -98,16 +116,16 @@ This repository uses environment variables for flexible paths:
 
 ```bash
 # Set workspace paths (adjust to your clone location)
-export VISTEC_REPO=~/Vistec_Intern_Exam              # This repo
-export UNITREE_LAB=~/unitree_rl_lab                   # Full training repo (clone separately)
-export ACTUATOR_NET=~/actuator_net                    # Actuator models (clone separately)
-export VISTEC_WS=~/vistec_ex_ws                       # ROS 2 workspace
+export VISTEC_REPO=~/Vistec_Intern_Exam                      # This repo
+export UNITREE_LAB=~/Vistec_Intern_Exam/unitree_rl_lab       # Isaac Lab framework (inside repo)
+export ACTUATOR_NET=~/Vistec_Intern_Exam/Actuator_net        # Actuator models (inside repo)
+export VISTEC_WS=~/Vistec_Intern_Exam/Vistec_ex_ws           # ROS 2 workspace (inside repo)
 
 # Make permanent
 echo "export VISTEC_REPO=~/Vistec_Intern_Exam" >> ~/.bashrc
-echo "export UNITREE_LAB=~/unitree_rl_lab" >> ~/.bashrc
-echo "export ACTUATOR_NET=~/actuator_net" >> ~/.bashrc
-echo "export VISTEC_WS=~/vistec_ex_ws" >> ~/.bashrc
+echo "export UNITREE_LAB=~/Vistec_Intern_Exam/unitree_rl_lab" >> ~/.bashrc
+echo "export ACTUATOR_NET=~/Vistec_Intern_Exam/Actuator_net" >> ~/.bashrc
+echo "export VISTEC_WS=~/Vistec_Intern_Exam/Vistec_ex_ws" >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -140,26 +158,19 @@ cd $VISTEC_REPO
 
 ## 🎓 Training Pipeline
 
-### Stage 1: Setup Training Repository
+### Stage 1: Install Isaac Lab Extension
 
 ```bash
-# Clone full training repository (if not exists)
-cd ~
-git clone <unitree_rl_lab_repo_url> unitree_rl_lab
+# Navigate to unitree_rl_lab (already in the repo)
 cd $UNITREE_LAB
 
-# Install extension
+# Install the extension into Isaac Lab
 ~/IsaacLab/isaaclab.sh -p -m pip install -e source/unitree_rl_lab
-
-# Copy configurations from this repo
-cp $VISTEC_REPO/unitree_rl_lab/Configs/velocity_env_cfg_mlp_custom.py \
-   source/unitree_rl_lab/unitree_rl_lab/tasks/locomotion/robots/go2/
-
-# Copy actuator models
-mkdir -p source/unitree_rl_lab/unitree_rl_lab/assets/actuator_models/
-cp $VISTEC_REPO/Actuator_net/app/resources/*.pth \
-   source/unitree_rl_lab/unitree_rl_lab/assets/actuator_models/
 ```
+
+✅ **All configurations and models are already in place!**
+- Custom configs: `source/unitree_rl_lab/unitree_rl_lab/tasks/locomotion/robots/go2/`
+- Actuator models: `source/unitree_rl_lab/unitree_rl_lab/assets/actuator_models/`
 
 ### Stage 2: Train Policy
 
