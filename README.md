@@ -8,25 +8,21 @@
 [![Gazebo](https://img.shields.io/badge/Gazebo-Ignition-orange)](https://gazebosim.org/)
 [![Python](https://img.shields.io/badge/Python-3.10-blue)](https://www.python.org/)
 
-This repository is a **complete, self-contained package** with everything needed for Sim2Sim transfer learning research on quadruped robots. No additional cloning required!
+**Complete, self-contained Sim2Sim transfer learning package**. Train in Isaac Lab, deploy to Gazebo. No additional repos needed!
 
-> 🚀 **NEW USER? START HERE**: [COMPLETE_USER_GUIDE.md](COMPLETE_USER_GUIDE.md) - Step-by-step guide from clone to running policies (30 minutes)
+> 📘 **COMPLETE GUIDE**: [COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md) - All documentation in one place!
 >
-> 📘 **Migration Guide**: [SELF_CONTAINED_REPOSITORY.md](SELF_CONTAINED_REPOSITORY.md) - Detailed structure explanation
+> 🚀 **Quick Start**: See sections below for 30-minute setup
 
 ---
 
-## 📋 Table of Contents
+## 📋 Quick Navigation
 
-- [Overview](#-overview)
-- [Repository Structure](#-repository-structure)
-- [Quick Start](#-quick-start)
-- [Training Pipeline](#-training-pipeline)
-- [Deployment](#-deployment)
-- [4 Locomotion Tasks](#-4-locomotion-tasks)
-- [Key Features](#-key-features)
-- [Troubleshooting](#-troubleshooting)
-- [Environment Versions](#-environment-versions)
+- **[COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md)** ← All documentation in one file
+- [Quick Start](#-quick-start) - 30-minute setup
+- [Gazebo Deployment](#-gazebo-deployment-3-terminals) - Launch robot simulation
+- [Pre-trained Models](#-pre-trained-models) - 6 ready-to-use policies
+- [Troubleshooting](#-troubleshooting) - Common issues & fixes
 
 ---
 
@@ -48,16 +44,19 @@ This repository enables you to:
 ```
 Vistec_Intern_Exam/
 ├── README.md                          # This comprehensive guide
-├── verify_setup.sh                    # Setup verification script
+├── COMPLETE_DOCUMENTATION.md          # Complete reference (all-in-one)
 │
+├── verify_setup.sh                    # Setup verification script
 ├── send_velocity_commands_gazebo.sh   # Gazebo velocity control (14 options)
 ├── send_velocity_commands_isaac.py    # Isaac velocity presets (13 tasks)
 │
-├── trained_models/                    # Pre-trained policies (22 MB)
-│   ├── mlp_with_dr_24999.pt          # ⭐ RECOMMENDED (MLP + DR)
-│   ├── implicit_dr_latest.pt          # Implicit actuator + DR
-│   ├── implicit_no_dr_latest.pt       # Implicit without DR
-│   └── lstm_dr_25000.pt               # LSTM + DR
+├── trained_models/                    # Pre-trained policies (27 MB)
+│   ├── mlp_dr.pt                      # ⭐ RECOMMENDED (MLP + DR)
+│   ├── mlp.pt                         # MLP without DR
+│   ├── lstm_dr.pt                     # LSTM + DR
+│   ├── lstm.pt                        # LSTM without DR
+│   ├── Implicit_dr.pt                 # Implicit actuator + DR
+│   └── implicit.pt                    # Implicit without DR
 │
 ├── unitree_rl_lab/                    # ⭐ COMPLETE Isaac Lab framework
 │   ├── source/                        # Framework source code
@@ -96,7 +95,7 @@ Vistec_Intern_Exam/
 
 > **📌 IMPORTANT**: This repository is **SELF-CONTAINED** with everything you need:
 > - ✅ Complete Isaac Lab framework (source/, scripts/)
-> - ✅ Pre-trained policies (22 MB)
+> - ✅ Pre-trained policies (27 MB - 6 models)
 > - ✅ Actuator models (LSTM, MLP, Implicit)
 > - ✅ 12 custom training configurations
 > - ✅ ROS 2 deployment workspace
@@ -200,6 +199,9 @@ python scripts/rsl_rl/train.py \
 ### Stage 3: Test & Export Policy
 
 ```bash
+# Activate Isaac Lab environment (if using conda)
+conda activate isaaclab  # Skip if not using conda
+
 cd $UNITREE_LAB
 
 # Test policy (automatically exports to ONNX/JIT)
@@ -231,7 +233,7 @@ cd $UNITREE_LAB
 mkdir -p logs/rsl_rl/unitree_go2_velocity_mlp_custom/pretrained
 
 # Copy pre-trained model
-cp $VISTEC_REPO/trained_models/mlp_with_dr_24999.pt \
+cp $VISTEC_REPO/trained_models/mlp_dr.pt \
    logs/rsl_rl/unitree_go2_velocity_mlp_custom/pretrained/
 
 # Play policy
@@ -239,7 +241,7 @@ python scripts/rsl_rl/play.py \
     --task Unitree-Go2-Velocity-MLP-Custom \
     --num_envs 32 \
     --load_run pretrained \
-    --checkpoint logs/rsl_rl/unitree_go2_velocity_mlp_custom/pretrained/mlp_with_dr_24999.pt
+    --checkpoint logs/rsl_rl/unitree_go2_velocity_mlp_custom/pretrained/mlp_dr.pt
 ```
 
 ### Option B: Gazebo (Realistic Simulation with ROS 2)
@@ -265,28 +267,45 @@ echo "source $VISTEC_WS/install/setup.bash" >> ~/.bashrc
 
 #### Launch Gazebo with Policy
 
+**Step 1: Launch Gazebo Fortress (Terminal 1)**
+
 ```bash
 cd $VISTEC_WS
 source install/setup.bash
 
-# Launch with pre-trained MLP policy (RECOMMENDED)
-ros2 launch deploy_policy go2_rl_policy.launch.py \
-    policy_path:=$VISTEC_REPO/trained_models/mlp_with_dr_24999.pt \
-    actuator_type:=mlp \
-    use_gpu:=true
+# Launch Gazebo with Go2 robot
+ros2 launch go2_gazebo_simulation go2_fortress.launch.py
+```
+
+**Expected**: Gazebo opens with Go2 robot spawned
+
+**Step 2: Deploy Policy (Terminal 2)**
+
+```bash
+# Deactivate conda if active
+conda deactivate
+
+cd $VISTEC_WS
+source install/setup.bash
+
+# Deploy pre-trained MLP policy (RECOMMENDED)
+ros2 launch deploy_policy go2_deploy.launch.py \
+    policy_path:=$VISTEC_REPO/trained_models/mlp_dr.pt \
+    device:=cpu
 ```
 
 **Launch Arguments**:
 - `policy_path`: Path to .pt or .onnx model
-- `actuator_type`: `mlp`, `lstm`, or `implicit`
-- `use_gpu`: `true` (CUDA) or `false` (CPU)
+- `device`: `cpu` or `cuda` (default: cpu, use `cuda` if GPU available)
 
-#### Send Velocity Commands
+#### Send Velocity Commands (Terminal 3)
 
 **Interactive Menu (14 options matching 4 training tasks)**:
 ```bash
 cd $VISTEC_REPO
 ./send_velocity_commands_gazebo.sh
+
+# Select an option (e.g., Option 3: Walk normal at 1.0 m/s)
 ```
 
 **Manual Command**:
@@ -405,12 +424,14 @@ This simplifies deployment and ensures fair actuator comparison.
 
 ### 4. Pre-trained Models Included
 
-| Model | Iterations | Size | Actuator | DR | Status |
-|-------|------------|------|----------|----|---------|
-| **mlp_with_dr_24999.pt** | 24,999 | 4.4 MB | MLP | ✅ | ⭐ **RECOMMENDED** |
-| implicit_dr_latest.pt | ~18,400 | 4.4 MB | Implicit | ✅ | Ready |
-| implicit_no_dr_latest.pt | ~12,100 | 4.4 MB | Implicit | ❌ | Ablation study |
-| lstm_dr_25000.pt | 25,000 | 4.4 MB | LSTM | ✅ | Research (obs issues) |
+| Model | Size | Actuator | DR | Status |
+|-------|------|----------|----|---------|
+| **mlp_dr.pt** | 4.4 MB | MLP | ✅ | ⭐ **RECOMMENDED** |
+| mlp.pt | 4.4 MB | MLP | ❌ | Baseline comparison |
+| lstm_dr.pt | 4.4 MB | LSTM | ✅ | Research use |
+| lstm.pt | 4.4 MB | LSTM | ❌ | Ablation study |
+| Implicit_dr.pt | 4.4 MB | Implicit | ✅ | Physics-based |
+| implicit.pt | 4.4 MB | Implicit | ❌ | Baseline |
 
 ---
 
@@ -439,7 +460,7 @@ bash -x verify_setup.sh
 
 # Check specific components
 ls $UNITREE_LAB  # Should show: source/, scripts/, logs/
-ls $VISTEC_REPO/trained_models  # Should show: 4 .pt files
+ls $VISTEC_REPO/trained_models  # Should show: 6 .pt files (mlp_dr.pt, mlp.pt, lstm_dr.pt, lstm.pt, Implicit_dr.pt, implicit.pt)
 ```
 
 ### Issue 3: Config File Not Found (Training)
@@ -559,6 +580,7 @@ This repo contains **essential files only**. Full source code:
 
 ### Helper Documentation
 
+- [COMPLETE_DOCUMENTATION.md](COMPLETE_DOCUMENTATION.md) - Comprehensive all-in-one guide
 - `unitree_rl_lab/Configs/README_PATHS.md` - Config path fixes
 - `Vistec_ex_ws/src/deploy_policy/config/README_CONFIG.md` - ROS 2 config guide
 - `verify_setup.sh` - Automated setup verification

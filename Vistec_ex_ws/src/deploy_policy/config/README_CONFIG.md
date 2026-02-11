@@ -32,7 +32,7 @@ Instead of editing these files, use launch arguments:
 ```bash
 # Override policy path at runtime
 ros2 launch deploy_policy go2_deploy.launch.py \
-    policy_path:=$VISTEC_REPO/trained_models/mlp_with_dr_24999.pt \
+    policy_path:=$VISTEC_REPO/trained_models/mlp_dr.pt \
     actuator_type:=mlp
 ```
 

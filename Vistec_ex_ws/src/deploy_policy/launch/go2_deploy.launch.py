@@ -26,7 +26,7 @@ def generate_launch_description():
     declare_policy_path = DeclareLaunchArgument(
         'policy_path',
         default_value=os.path.join(os.getenv('VISTEC_REPO', os.path.expanduser('~/Vistec_Intern_Exam')),
-                                   'trained_models', 'mlp_with_dr_24999.pt'),
+                                   'trained_models', 'mlp_dr.pt'),
         description='Path to the trained Go2 policy checkpoint'
     )
 
