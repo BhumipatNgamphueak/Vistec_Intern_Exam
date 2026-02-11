@@ -108,12 +108,14 @@ cd $VISTEC_REPO
 
 ### Quick Test (1 minute)
 
+**Note**: If you use conda, activate your environment first: `conda activate isaaclab`
+
 ```bash
 cd $UNITREE_LAB
 
 # Test with pre-trained MLP policy (RECOMMENDED)
 ~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
-  --task Unitree-Go2-Velocity-Rough \
+  --task Unitree-Go2-Velocity-MLP-Custom \
   --checkpoint $VISTEC_REPO/trained_models/mlp_with_dr_24999.pt \
   --num_envs 1
 ```
@@ -131,25 +133,25 @@ cd $UNITREE_LAB
 
 # 1. MLP with DR (RECOMMENDED - Best performance)
 ~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
-  --task Unitree-Go2-Velocity-Rough-MLP-Custom \
+  --task Unitree-Go2-Velocity-MLP-Custom \
   --checkpoint $VISTEC_REPO/trained_models/mlp_with_dr_24999.pt \
   --num_envs 4
 
 # 2. LSTM with DR
 ~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
-  --task Unitree-Go2-Velocity-Rough-LSTM-With-DR \
+  --task Unitree-Go2-Velocity-LSTM-DR \
   --checkpoint $VISTEC_REPO/trained_models/lstm_dr_25000.pt \
   --num_envs 4
 
 # 3. Implicit with DR
 ~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
-  --task Unitree-Go2-Velocity-Rough-Implicit-With-DR \
+  --task Unitree-Go2-Velocity-Implicit-DR \
   --checkpoint $VISTEC_REPO/trained_models/implicit_dr_latest.pt \
   --num_envs 4
 
 # 4. Implicit without DR
 ~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
-  --task Unitree-Go2-Velocity-Rough-Implicit \
+  --task Unitree-Go2-Velocity-Implicit \
   --checkpoint $VISTEC_REPO/trained_models/implicit_no_dr_latest.pt \
   --num_envs 4
 ```
@@ -263,7 +265,7 @@ cd $UNITREE_LAB
 
 # Train MLP policy with domain randomization (RECOMMENDED)
 ~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/train.py \
-  --task Unitree-Go2-Velocity-Rough-MLP-Custom \
+  --task Unitree-Go2-Velocity-MLP-Custom \
   --num_envs 4096 \
   --headless
 
@@ -275,7 +277,7 @@ cd $UNITREE_LAB
 **Test your trained model**:
 ```bash
 ~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
-  --task Unitree-Go2-Velocity-Rough-MLP-Custom \
+  --task Unitree-Go2-Velocity-MLP-Custom \
   --checkpoint $UNITREE_LAB/logs/rsl_rl/unitree_go2_velocity_mlp_custom/latest/model.pt
 ```
 
