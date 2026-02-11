@@ -54,6 +54,10 @@ source ~/.bashrc
 **Prerequisite**: NVIDIA GPU with CUDA support
 
 ```bash
+# OPTIONAL: If you use conda, create and activate environment first
+conda create -n isaaclab python=3.10 -y
+conda activate isaaclab
+
 # Install Isaac Lab 2.3.0
 cd ~
 git clone https://github.com/isaac-sim/IsaacLab.git
@@ -65,6 +69,9 @@ cd ~/IsaacLab
 ```bash
 export ISAACLAB_PATH=~/IsaacLab
 echo "export ISAACLAB_PATH=~/IsaacLab" >> ~/.bashrc
+
+# If using conda, add to conda activate script
+echo "export ISAACLAB_PATH=~/IsaacLab" >> ~/.bashrc
 ```
 
 **Result**: Isaac Lab framework installed
@@ -74,6 +81,9 @@ echo "export ISAACLAB_PATH=~/IsaacLab" >> ~/.bashrc
 ### Step 4: Install unitree_rl_lab Extension (5 minutes)
 
 ```bash
+# If using conda, activate your environment
+conda activate isaaclab  # (skip if not using conda)
+
 # Navigate to unitree_rl_lab in the cloned repo
 cd $UNITREE_LAB
 
