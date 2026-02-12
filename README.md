@@ -13,18 +13,6 @@
 
 ---
 
-## 📋 Quick Navigation
-
-| Section | Description |
-|---------|-------------|
-| [Quick Start](#-quick-start) | Clone to running policies in 30 min |
-| [Pre-trained Models](#-pre-trained-models) | 6 ready-to-use policies (27 MB) |
-| [Gazebo Deployment](#-deployment) | 3-terminal workflow |
-| [Training Pipeline](#-training-pipeline) | Train your own policies |
-| [4 Locomotion Tasks](#-4-locomotion-tasks) | Stand, Walk, Turn, Combined |
-| [Velocity Commands](#-velocity-commands-guide) | Testing the 4 tasks |
-| [Task Names](#-registered-task-names) | All registered Isaac Lab tasks |
-
 ## 📁 Repository Structure
 
 ```
