@@ -169,9 +169,9 @@ def run_isaac_test(task_id: str, policy_type: str = "mlp", num_envs: int = 1):
     task_info = TASK_SEQUENCES[task_id]
     policy_info = POLICIES[policy_type]
 
-    # Get paths
-    vistec_repo = os.getenv("VISTEC_REPO", os.path.expanduser("~/Vistec_Intern_Exam"))
-    isaaclab_path = os.getenv("ISAACLAB_PATH", os.path.expanduser("~/IsaacLab"))
+    # Get paths (expand ~ to home directory)
+    vistec_repo = Path(os.getenv("VISTEC_REPO", os.path.expanduser("~/Vistec_Intern_Exam")))
+    isaaclab_path = Path(os.getenv("ISAACLAB_PATH", os.path.expanduser("~/IsaacLab")))
 
     checkpoint_path = Path(vistec_repo) / policy_info["checkpoint"]
     if not checkpoint_path.exists():
@@ -242,7 +242,7 @@ def run_isaac_test(task_id: str, policy_type: str = "mlp", num_envs: int = 1):
 
     # Run the command
     try:
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, cwd=str(isaaclab_path))
         return True
     except subprocess.CalledProcessError as e:
         print(f"\n❌ ERROR: Command failed with exit code {e.returncode}")
