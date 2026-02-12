@@ -161,16 +161,34 @@ cd ~/IsaacLab
   --checkpoint $VISTEC_REPO/trained_models/mlp_dr.pt \
   --num_envs 4
 
-# 2. LSTM with DR
+# 2. MLP without DR
+~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-MLP-No-DR \
+  --checkpoint $VISTEC_REPO/trained_models/mlp.pt \
+  --num_envs 4
+
+# 3. LSTM with DR
 ~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
   --task Unitree-Go2-Velocity-LSTM-DR \
   --checkpoint $VISTEC_REPO/trained_models/lstm_dr.pt \
   --num_envs 4
 
-# 3. Implicit with DR
+# 4. LSTM without DR
+~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-LSTM-No-DR \
+  --checkpoint $VISTEC_REPO/trained_models/lstm.pt \
+  --num_envs 4
+
+# 5. Implicit with DR
 ~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
   --task Unitree-Go2-Velocity-Implicit-DR \
   --checkpoint $VISTEC_REPO/trained_models/Implicit_dr.pt \
+  --num_envs 4
+
+# 6. Implicit without DR
+~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-Implicit \
+  --checkpoint $VISTEC_REPO/trained_models/implicit.pt \
   --num_envs 4
 ```
 
@@ -368,22 +386,40 @@ done
 ```bash
 cd ~/IsaacLab
 
-# MLP Policy with DR (RECOMMENDED)
+# 1. MLP with DR (RECOMMENDED)
 ~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
   --task Unitree-Go2-Velocity-MLP-Custom \
   --checkpoint $VISTEC_REPO/trained_models/mlp_dr.pt \
   --num_envs 4
 
-# LSTM Policy with DR
+# 2. MLP without DR
+~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-MLP-No-DR \
+  --checkpoint $VISTEC_REPO/trained_models/mlp.pt \
+  --num_envs 4
+
+# 3. LSTM with DR
 ~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
   --task Unitree-Go2-Velocity-LSTM-DR \
   --checkpoint $VISTEC_REPO/trained_models/lstm_dr.pt \
   --num_envs 4
 
-# Implicit Actuator with DR
+# 4. LSTM without DR
+~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-LSTM-No-DR \
+  --checkpoint $VISTEC_REPO/trained_models/lstm.pt \
+  --num_envs 4
+
+# 5. Implicit with DR
 ~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
   --task Unitree-Go2-Velocity-Implicit-DR \
   --checkpoint $VISTEC_REPO/trained_models/Implicit_dr.pt \
+  --num_envs 4
+
+# 6. Implicit without DR
+~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-Implicit \
+  --checkpoint $VISTEC_REPO/trained_models/implicit.pt \
   --num_envs 4
 ```
 
@@ -398,6 +434,14 @@ cd ~/IsaacLab
 #   --task          : Task name (see "Registered Task Names" section)
 #   --checkpoint    : Path to .pt model file
 #   --num_envs      : Number of parallel environments (default: 1)
+
+# Model → Task mapping:
+#   mlp_dr.pt       → Unitree-Go2-Velocity-MLP-Custom
+#   mlp.pt          → Unitree-Go2-Velocity-MLP-No-DR
+#   lstm_dr.pt      → Unitree-Go2-Velocity-LSTM-DR
+#   lstm.pt         → Unitree-Go2-Velocity-LSTM-No-DR
+#   Implicit_dr.pt  → Unitree-Go2-Velocity-Implicit-DR
+#   implicit.pt     → Unitree-Go2-Velocity-Implicit
 ```
 
 ---
@@ -465,11 +509,20 @@ ros2 launch deploy_policy go2_deploy.launch.py \
 # MLP with DR (RECOMMENDED)
 policy_path:=$VISTEC_REPO/trained_models/mlp_dr.pt
 
+# MLP without DR
+policy_path:=$VISTEC_REPO/trained_models/mlp.pt
+
 # LSTM with DR
 policy_path:=$VISTEC_REPO/trained_models/lstm_dr.pt
 
+# LSTM without DR
+policy_path:=$VISTEC_REPO/trained_models/lstm.pt
+
 # Implicit with DR
 policy_path:=$VISTEC_REPO/trained_models/Implicit_dr.pt
+
+# Implicit without DR
+policy_path:=$VISTEC_REPO/trained_models/implicit.pt
 ```
 
 #### Terminal 2: Launch Gazebo Simulation
@@ -637,5 +690,5 @@ cd $VISTEC_REPO
 | **Task 2** | ✅ Supported | ✅ Auto-runs 4 rates |
 | **Task 3** | ✅ Supported | ✅ Auto-runs 5 maneuvers |
 | **Sequences** | Exact training sequences | Exact training sequences |
-| **Policy** | MLP/LSTM (--lstm flag) | MLP/LSTM (launch param) |
+| **Policy** | 6 models (--policy flag) | MLP/LSTM (launch param) |
 | **Visualization** | Isaac Sim GUI | Gazebo GUI |
