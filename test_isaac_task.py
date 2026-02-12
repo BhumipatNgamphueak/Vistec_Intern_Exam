@@ -63,11 +63,11 @@ TASK_SEQUENCES = {
 # Policy configurations
 POLICIES = {
     "mlp": {
-        "checkpoint": "trained_models/mlp_with_dr_24999.pt",
+        "checkpoint": "trained_models/mlp_dr.pt",
         "task": "Unitree-Go2-Velocity-MLP-Custom"
     },
     "lstm": {
-        "checkpoint": "trained_models/lstm_dr_25000.pt",
+        "checkpoint": "trained_models/lstm_dr.pt",
         "task": "Unitree-Go2-Velocity-LSTM-DR"
     }
 }
@@ -223,7 +223,7 @@ def run_isaac_test(task_id: str, policy_type: str = "mlp", num_envs: int = 1):
     print()
 
     # Build command
-    play_script = Path(isaaclab_path) / "source" / "standalone" / "workflows" / "rsl_rl" / "play.py"
+    play_script = Path(isaaclab_path) / "scripts" / "reinforcement_learning" / "rsl_rl" / "play.py"
 
     cmd = [
         "python",
