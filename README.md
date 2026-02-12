@@ -130,7 +130,7 @@ cd $VISTEC_REPO
 ./verify_setup.sh
 ```
 
-**Expected**: ✅ All checks passed (environment vars, directories, software)
+**Expected**: ✅ All checks passed (environment vars, directories, software) expect Ros2 folder because we didn't build yet.
 
 ---
 
