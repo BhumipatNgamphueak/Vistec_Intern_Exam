@@ -2,24 +2,19 @@
 """
 Send velocity commands to Isaac Lab simulation for testing trained policies.
 
-Matches the 4 training tasks with SIMPLIFIED + DETAILED options:
+4 Main Locomotion Tasks:
 1. Standing
-2. Walking (varying speeds)
+2. Walking
 3. Turn in Place
-4. Walk + Turn (combined)
+4. Walk + Turn
 
-Usage (SIMPLIFIED - 4 main tasks):
+Usage:
     python send_velocity_commands_isaac.py --task 1   # Task 1: Standing
-    python send_velocity_commands_isaac.py --task 2   # Task 2: Walk normal
-    python send_velocity_commands_isaac.py --task 3   # Task 3: Turn normal
+    python send_velocity_commands_isaac.py --task 2   # Task 2: Walking
+    python send_velocity_commands_isaac.py --task 3   # Task 3: Turn in Place
     python send_velocity_commands_isaac.py --task 4   # Task 4: Walk+Turn
 
-Usage (DETAILED - 17 variants):
-    python send_velocity_commands_isaac.py --task 2.1   # Walk slow
-    python send_velocity_commands_isaac.py --task 3.3   # Turn CW
-    python send_velocity_commands_isaac.py --task 4.2   # Straight fast
-
-Usage (CUSTOM):
+Custom:
     python send_velocity_commands_isaac.py --linear_x 0.5 --angular_z 0.3
 """
 
@@ -28,65 +23,22 @@ import numpy as np
 
 # Define 4 training tasks
 TASKS = {
-    # TASK 1: Standing
     "1": {"name": "Task 1: Standing", "vx": 0.0, "vy": 0.0, "wz": 0.0},
-
-    # TASK 2: Walking (simplified alias + detailed variants)
-    "2": {"name": "Task 2: Walking (normal 1.0 m/s)", "vx": 1.0, "vy": 0.0, "wz": 0.0},  # ⭐ ALIAS
-    "2.1": {"name": "Walk slow", "vx": 0.5, "vy": 0.0, "wz": 0.0},
-    "2.2": {"name": "Walk normal", "vx": 1.0, "vy": 0.0, "wz": 0.0},
-    "2.3": {"name": "Walk fast", "vx": 1.5, "vy": 0.0, "wz": 0.0},
-    "2.4": {"name": "Walk moderate", "vx": 0.8, "vy": 0.0, "wz": 0.0},
-
-    # TASK 3: Turn in Place (simplified alias + detailed variants)
-    "3": {"name": "Task 3: Turn in Place (normal 1.0 rad/s)", "vx": 0.0, "vy": 0.0, "wz": 1.0},  # ⭐ ALIAS
-    "3.1": {"name": "Turn slow CCW", "vx": 0.0, "vy": 0.0, "wz": 0.5},
-    "3.2": {"name": "Turn normal CCW", "vx": 0.0, "vy": 0.0, "wz": 1.0},
-    "3.3": {"name": "Turn normal CW", "vx": 0.0, "vy": 0.0, "wz": -1.0},
-    "3.4": {"name": "Turn fast CCW", "vx": 0.0, "vy": 0.0, "wz": 1.5},
-
-    # TASK 4: Walk + Turn (simplified alias + detailed variants)
-    "4": {"name": "Task 4: Walk + Turn (arc)", "vx": 0.8, "vy": 0.0, "wz": 0.6},  # ⭐ ALIAS
-    "4.1": {"name": "Right arc", "vx": 0.8, "vy": 0.0, "wz": 0.6},
-    "4.2": {"name": "Straight fast", "vx": 1.2, "vy": 0.0, "wz": 0.0},
-    "4.3": {"name": "Left arc", "vx": 0.8, "vy": 0.0, "wz": -0.6},
-    "4.4": {"name": "Tight turn", "vx": 0.5, "vy": 0.0, "wz": 1.0},
+    "2": {"name": "Task 2: Walking (1.0 m/s)", "vx": 1.0, "vy": 0.0, "wz": 0.0},
+    "3": {"name": "Task 3: Turn in Place (1.0 rad/s)", "vx": 0.0, "vy": 0.0, "wz": 1.0},
+    "4": {"name": "Task 4: Walk + Turn (arc)", "vx": 0.8, "vy": 0.0, "wz": 0.6},
 }
 
 def list_tasks():
     """Print all available tasks."""
     print("="*70)
-    print("Available Tasks (matching training episodes)")
+    print("Available Tasks (4 Locomotion Primitives)")
     print("="*70)
-
-    print("\n🎯 SIMPLIFIED (4 main tasks):")
-    print("  1      - Task 1: Standing (0.0, 0.0, 0.0)")
-    print("  2      - Task 2: Walking normal (1.0 m/s)")
-    print("  3      - Task 3: Turn normal (1.0 rad/s)")
-    print("  4      - Task 4: Walk + Turn arc (0.8 m/s, 0.6 rad/s)")
-
-    print("\n📋 DETAILED (all 17 variants):")
-    print("\nTASK 1: Standing")
-    print("  1      - Stand still (0.0, 0.0, 0.0)")
-    print("\nTASK 2: Walking")
-    print("  2      - Walk normal (1.0 m/s) ⭐")
-    print("  2.1    - Walk slow (0.5 m/s)")
-    print("  2.2    - Walk normal (1.0 m/s)")
-    print("  2.3    - Walk fast (1.5 m/s)")
-    print("  2.4    - Walk moderate (0.8 m/s)")
-    print("\nTASK 3: Turn in Place")
-    print("  3      - Turn normal CCW (1.0 rad/s) ⭐")
-    print("  3.1    - Turn slow CCW (+0.5 rad/s)")
-    print("  3.2    - Turn normal CCW (+1.0 rad/s)")
-    print("  3.3    - Turn normal CW (-1.0 rad/s)")
-    print("  3.4    - Turn fast CCW (+1.5 rad/s)")
-    print("\nTASK 4: Walk + Turn")
-    print("  4      - Right arc (0.8 m/s, +0.6 rad/s) ⭐")
-    print("  4.1    - Right arc (0.8 m/s, +0.6 rad/s)")
-    print("  4.2    - Straight fast (1.2 m/s)")
-    print("  4.3    - Left arc (0.8 m/s, -0.6 rad/s)")
-    print("  4.4    - Tight turn (0.5 m/s, +1.0 rad/s)")
-    print("\n⭐ = Simplified alias")
+    print("\n🎯 4 MAIN TASKS:")
+    print("  1 - Task 1: Standing        (0.0, 0.0, 0.0)")
+    print("  2 - Task 2: Walking         (1.0 m/s)")
+    print("  3 - Task 3: Turn in Place   (1.0 rad/s)")
+    print("  4 - Task 4: Walk + Turn     (0.8 m/s, 0.6 rad/s)")
     print("="*70)
 
 def send_velocity_command(linear_x=0.0, linear_y=0.0, angular_z=0.0, task_name="Custom"):
@@ -134,19 +86,19 @@ def send_velocity_command(linear_x=0.0, linear_y=0.0, angular_z=0.0, task_name="
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Isaac Lab Velocity Command Sender - Matching 4 Training Tasks",
+        description="Isaac Lab Velocity Command Sender - 4 Main Tasks",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   python send_velocity_commands_isaac.py --task 1       # Standing
-  python send_velocity_commands_isaac.py --task 2.2     # Walk normal
-  python send_velocity_commands_isaac.py --task 3.1     # Turn slow CCW
-  python send_velocity_commands_isaac.py --task 4.1     # Right arc
+  python send_velocity_commands_isaac.py --task 2       # Walking
+  python send_velocity_commands_isaac.py --task 3       # Turn in Place
+  python send_velocity_commands_isaac.py --task 4       # Walk + Turn
   python send_velocity_commands_isaac.py --list         # List all tasks
   python send_velocity_commands_isaac.py --linear_x 0.6 # Custom command
         """
     )
-    parser.add_argument("--task", type=str, help="Task ID (e.g., 1, 2.1, 3.2, 4.4)")
+    parser.add_argument("--task", type=str, help="Task ID (1, 2, 3, or 4)")
     parser.add_argument("--linear_x", type=float, help="Forward velocity (m/s), range: -1.0 to 1.0")
     parser.add_argument("--linear_y", type=float, default=0.0, help="Lateral velocity (m/s), range: -0.4 to 0.4")
     parser.add_argument("--angular_z", type=float, help="Yaw rate (rad/s), range: -1.0 to 1.0")
@@ -163,6 +115,7 @@ Examples:
     if args.task:
         if args.task not in TASKS:
             print(f"ERROR: Unknown task '{args.task}'")
+            print("Valid tasks: 1, 2, 3, 4")
             print("Run with --list to see available tasks")
             return
 
@@ -188,7 +141,7 @@ Examples:
     else:
         list_tasks()
         print("\nUsage examples:")
-        print("  python send_velocity_commands_isaac.py --task 2.2")
+        print("  python send_velocity_commands_isaac.py --task 2")
         print("  python send_velocity_commands_isaac.py --linear_x 0.8 --angular_z 0.5")
         return
 
