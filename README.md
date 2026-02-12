@@ -268,36 +268,141 @@ cd $UNITREE_LAB
 
 ---
 
-## 🎮 Deployment
+---
 
-### Option A: Isaac Lab (Visualization & Testing)
+## 🎮 Testing & Deployment
 
-**Use pre-trained models from this repo**:
+Two testing environments available:
+- **Isaac Lab**: Physics simulation with GPU acceleration (visualization & training)
+- **Gazebo**: Realistic simulation with ROS 2 (deployment testing)
+
+---
+
+## 🔬 ISAAC LAB: Testing Policies
+
+### Prerequisites
 
 ```bash
 # Activate Isaac Lab environment (if using conda)
 conda activate env_isaaclab  # Skip if not using conda
 
-cd $UNITREE_LAB
-
-# Create directory structure
-mkdir -p logs/rsl_rl/unitree_go2_velocity_mlp_custom/pretrained
-
-# Copy pre-trained model
-cp $VISTEC_REPO/trained_models/mlp_dr.pt \
-   logs/rsl_rl/unitree_go2_velocity_mlp_custom/pretrained/
-
-# Play policy
-~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
-  --task Unitree-Go2-Velocity-MLP-Custom \
-  --num_envs 32 \
-  --load_run pretrained \
-  --checkpoint logs/rsl_rl/unitree_go2_velocity_mlp_custom/pretrained/mlp_dr.pt
+# Set environment variables
+export VISTEC_REPO=~/Vistec_Intern_Exam
+export UNITREE_LAB=$VISTEC_REPO/unitree_rl_lab
+export ISAACLAB_PATH=~/IsaacLab
 ```
 
-### Option B: Gazebo (Realistic Simulation with ROS 2)
+### Method 1: Direct Testing with Test Script (RECOMMENDED)
 
-#### Setup ROS 2 Workspace (First Time)
+**Step-by-step for all 4 tasks:**
+
+```bash
+cd $VISTEC_REPO
+
+# Task 0: Standing (20s)
+python test_isaac_task.py --task 0
+
+# Task 1: Walking (4 speeds, auto-switching)
+python test_isaac_task.py --task 1
+
+# Task 2: Turn in Place (4 rates, auto-switching)
+python test_isaac_task.py --task 2
+
+# Task 3: Walk + Turn (5 maneuvers, auto-switching)
+python test_isaac_task.py --task 3
+
+# Test with LSTM policy
+python test_isaac_task.py --task 1 --lstm
+
+# List all tasks and sequences
+python test_isaac_task.py --list
+```
+
+**Command Pattern:**
+```bash
+python test_isaac_task.py --task <TASK_ID> [--lstm] [--envs <NUM>]
+
+# Parameters:
+#   --task <0-3>    : Task ID (0=Standing, 1=Walking, 2=Turn, 3=Walk+Turn)
+#   --lstm          : Use LSTM policy instead of MLP (optional)
+#   --mlp           : Use MLP policy (default)
+#   --envs <NUM>    : Number of parallel environments (default: 1)
+#   --list          : List all tasks
+```
+
+**Examples:**
+```bash
+# Test Task 1 with 4 parallel environments
+python test_isaac_task.py --task 1 --envs 4
+
+# Test all tasks sequentially
+for task in 0 1 2 3; do
+    echo "Testing Task $task..."
+    python test_isaac_task.py --task $task
+done
+
+# Test with both MLP and LSTM policies
+for policy in mlp lstm; do
+    python test_isaac_task.py --task 1 --$policy
+done
+```
+
+### Method 2: Direct Isaac Lab Play Script
+
+```bash
+cd $UNITREE_LAB
+
+# MLP Policy with DR (RECOMMENDED)
+~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-MLP-Custom \
+  --checkpoint $VISTEC_REPO/trained_models/mlp_dr.pt \
+  --num_envs 4
+
+# LSTM Policy with DR
+~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-LSTM-DR \
+  --checkpoint $VISTEC_REPO/trained_models/lstm_dr.pt \
+  --num_envs 4
+
+# Implicit Actuator with DR
+~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
+  --task Unitree-Go2-Velocity-Implicit-DR \
+  --checkpoint $VISTEC_REPO/trained_models/Implicit_dr.pt \
+  --num_envs 4
+```
+
+**Command Pattern:**
+```bash
+~/IsaacLab/isaaclab.sh -p scripts/rsl_rl/play.py \
+  --task <TASK_NAME> \
+  --checkpoint <PATH_TO_MODEL> \
+  --num_envs <NUM>
+
+# Parameters:
+#   --task          : Task name (see "Registered Task Names" section)
+#   --checkpoint    : Path to .pt model file
+#   --num_envs      : Number of parallel environments (default: 1)
+```
+
+---
+
+## 🤖 GAZEBO: ROS 2 Deployment Testing
+
+### Prerequisites
+
+```bash
+# Deactivate conda if active
+conda deactivate
+
+# Set environment variables
+export VISTEC_REPO=~/Vistec_Intern_Exam
+export VISTEC_WS=$VISTEC_REPO/Vistec_ex_ws
+
+# Source ROS 2
+source /opt/ros/humble/setup.bash
+```
+
+### Setup ROS 2 Workspace (First Time Only)
 
 ```bash
 cd $VISTEC_WS
@@ -311,9 +416,9 @@ source install/setup.bash
 echo "source $VISTEC_WS/install/setup.bash" >> ~/.bashrc
 ```
 
-#### Launch Gazebo with Policy (3 Terminals)
+### Launch & Test (3 Terminals Required)
 
-**Step 1: Deploy Policy (Terminal 1)**
+#### Terminal 1: Deploy Policy Node
 
 ```bash
 # Deactivate conda if active
@@ -328,11 +433,30 @@ ros2 launch deploy_policy go2_deploy.launch.py \
   device:=cpu
 ```
 
-**Launch Arguments**:
-- `policy_path`: Path to .pt or .onnx model
-- `device`: `cpu` or `cuda` (default: cpu, use `cuda` if GPU available)
+**Command Pattern:**
+```bash
+ros2 launch deploy_policy go2_deploy.launch.py \
+  policy_path:=<PATH_TO_MODEL> \
+  device:=<cpu|cuda>
 
-**Step 2: Launch Gazebo Fortress (Terminal 2)**
+# Parameters:
+#   policy_path: Path to .pt or .onnx model file
+#   device:      cpu or cuda (default: cpu)
+```
+
+**Available Models:**
+```bash
+# MLP with DR (RECOMMENDED)
+policy_path:=$VISTEC_REPO/trained_models/mlp_dr.pt
+
+# LSTM with DR
+policy_path:=$VISTEC_REPO/trained_models/lstm_dr.pt
+
+# Implicit with DR
+policy_path:=$VISTEC_REPO/trained_models/Implicit_dr.pt
+```
+
+#### Terminal 2: Launch Gazebo Simulation
 
 ```bash
 # Deactivate conda if active
@@ -341,115 +465,158 @@ conda deactivate
 cd $VISTEC_WS
 source install/setup.bash
 
-# Launch Gazebo with Go2 robot
+# Launch Gazebo Fortress with Go2 robot
 ros2 launch go2_gazebo_simulation go2_fortress.launch.py
 ```
 
-**Expected**: Gazebo opens with Go2 robot spawned
+**Expected Output**: Gazebo window opens with Go2 robot spawned
 
-**Step 3: Send Velocity Commands (Terminal 3)**
+#### Terminal 3: Send Velocity Commands
 
-**Automatic Testing with Training Sequences**:
+**Method 1: Automatic Test Script (RECOMMENDED)**
+
+Test with exact training sequences:
+
 ```bash
 cd $VISTEC_REPO
 ./test_gazebo_task.sh
 
-# Select a task (0-3):
-# 0 - Task 0: Standing (20s)
-# 1 - Task 1: Walking (auto-runs 4 speeds)
-# 2 - Task 2: Turn (auto-runs 4 rates)
-# 3 - Task 3: Walk+Turn (auto-runs 5 maneuvers)
-
-# Script automatically executes the entire 20-second sequence!
+# Interactive menu appears:
+# Select task 0, 1, 2, or 3
+# Script automatically runs the entire 20-second sequence!
 ```
 
-**Manual Static Command**:
+**Task Options:**
+- **Task 0**: Standing (20s) - vx=0.0
+- **Task 1**: Walking (20s, 4 speeds) - vx: 0.5→1.0→1.5→0.8
+- **Task 2**: Turn (20s, 4 rates) - wz: +0.5→+1.0→-1.0→+1.5
+- **Task 3**: Walk+Turn (20s, 5 maneuvers) - Combined motions
+
+**Method 2: Manual ROS 2 Command**
+
+For static velocity commands:
+
 ```bash
+# Forward walking at 1.0 m/s
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
   "linear: {x: 1.0, y: 0.0, z: 0.0}
    angular: {x: 0.0, y: 0.0, z: 0.0}" --rate 10
+
+# Turn in place at 1.0 rad/s (CCW)
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
+  "linear: {x: 0.0, y: 0.0, z: 0.0}
+   angular: {x: 0.0, y: 0.0, z: 1.0}" --rate 10
+
+# Walk + Turn (arc motion)
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
+  "linear: {x: 0.8, y: 0.0, z: 0.0}
+   angular: {x: 0.0, y: 0.0, z: 0.6}" --rate 10
+```
+
+**Command Pattern:**
+```bash
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
+  "linear: {x: <VX>, y: <VY>, z: 0.0}
+   angular: {x: 0.0, y: 0.0, z: <WZ>}" --rate 10
+
+# Parameters:
+#   VX:  Forward/backward velocity (m/s), range: -1.0 to 1.0
+#   VY:  Left/right velocity (m/s), range: -0.4 to 0.4
+#   WZ:  Yaw rotation rate (rad/s), range: -1.0 to 1.0
 ```
 
 ---
 
-## 🎯 4 Locomotion Tasks
+---
+
+## 🎯 4 Locomotion Tasks (Training Sequences)
 
 The robot is trained and tested on **4 fundamental locomotion primitives** with time-varying sequences:
 
-| Task | Description | Duration | Sequence | Isaac | Gazebo |
-|------|-------------|----------|----------|-------|--------|
-| **0** | Standing | 20s | vx=0.0 (constant) | `--task 0` | Option 0 |
-| **1** | Walking | 20s | vx: 0.5→1.0→1.5→0.8 m/s (5s each) | `--task 1` | Option 1 |
-| **2** | Turn in Place | 20s | wz: +0.5→+1.0→-1.0→+1.5 rad/s (5s each) | `--task 2` | Option 2 |
-| **3** | Walk + Turn | 20s | 5 maneuvers (arc, straight, etc.) | `--task 3` | Option 3 |
+### Task Definitions
 
-**Training Sequences**:
-- **Task 0**: Standing still for 20 seconds
-- **Task 1**: 4 different walking speeds (slow, normal, fast, moderate)
-- **Task 2**: 4 different turn rates including direction change (CCW→CW→CCW)
-- **Task 3**: 5 combined maneuvers (right arc, straight, left arc, fast, tight turn)
+| Task | Name | Duration | Sequence Details |
+|------|------|----------|------------------|
+| **0** | Standing | 20s | vx=0.0, vy=0.0, wz=0.0 (constant) |
+| **1** | Walking | 20s | vx: 0.5→1.0→1.5→0.8 m/s (5s each, 4 speeds) |
+| **2** | Turn in Place | 20s | wz: +0.5→+1.0→-1.0→+1.5 rad/s (5s each, 4 rates) |
+| **3** | Walk + Turn | 20s | 5 combined maneuvers (see below) |
 
-**Note**: Test scripts use the **exact time-varying sequences** from training experiments!
+### Detailed Sequences
+
+**Task 0: Standing (20s)**
+- Constant: vx=0.0, vy=0.0, wz=0.0 for entire 20 seconds
+
+**Task 1: Walking (20s, 4 segments)**
+1. Slow: vx=0.5 m/s for 5s
+2. Normal: vx=1.0 m/s for 5s
+3. Fast: vx=1.5 m/s for 5s
+4. Moderate: vx=0.8 m/s for 5s
+
+**Task 2: Turn in Place (20s, 4 segments)**
+1. Slow CCW: wz=+0.5 rad/s for 5s
+2. Normal CCW: wz=+1.0 rad/s for 5s
+3. Normal CW: wz=-1.0 rad/s for 5s (direction change!)
+4. Fast CCW: wz=+1.5 rad/s for 5s
+
+**Task 3: Walk + Turn (20s, 5 segments)**
+1. Right arc: (vx=0.8, wz=+0.6) for 5s
+2. Straight: (vx=1.0, wz=0.0) for 2s
+3. Left arc: (vx=0.8, wz=-0.6) for 5s
+4. Fast straight: (vx=1.2, wz=0.0) for 3s
+5. Tight turn: (vx=0.5, wz=+1.0) for 5s
 
 ---
 
-## 📊 Testing with Exact Training Sequences
+## 📊 Quick Testing Guide
 
-Test policies with the **same time-varying sequences** used in training:
-
-### 🎯 Isaac Lab Testing
+### Isaac Lab - Quick Commands
 
 ```bash
-# Test with exact training sequences
-python test_isaac_task.py --task 0    # Task 0: Standing (20s)
-python test_isaac_task.py --task 1    # Task 1: Walking (4 speeds)
-python test_isaac_task.py --task 2    # Task 2: Turn (4 rates)
-python test_isaac_task.py --task 3    # Task 3: Walk+Turn (5 maneuvers)
+cd $VISTEC_REPO
 
-# With LSTM policy
-python test_isaac_task.py --task 1 --lstm
+# Test Task 0 (Standing)
+python test_isaac_task.py --task 0
 
-# List all tasks and sequences
+# Test Task 1 (Walking - 4 speeds)
+python test_isaac_task.py --task 1
+
+# Test Task 2 (Turn - 4 rates)
+python test_isaac_task.py --task 2
+
+# Test Task 3 (Walk+Turn - 5 maneuvers)
+python test_isaac_task.py --task 3
+
+# List all tasks
 python test_isaac_task.py --list
 
-# Test all tasks
+# Test all tasks in sequence
 for task in 0 1 2 3; do
     python test_isaac_task.py --task $task
 done
 ```
 
-### 🎯 Gazebo Testing
-
-**Automatic sequence execution** (runs entire 20s sequence):
+### Gazebo - Quick Commands
 
 ```bash
+cd $VISTEC_REPO
+
+# Launch test script (interactive menu)
 ./test_gazebo_task.sh
 
-# Select task:
-# 0 - Task 0: Standing (20s)
-# 1 - Task 1: Walking (4 speeds, auto-switching)
-# 2 - Task 2: Turn (4 rates, auto-switching)
-# 3 - Task 3: Walk+Turn (5 maneuvers, auto-switching)
+# Then select: 0, 1, 2, or 3
+# Script automatically runs the entire 20-second sequence!
 ```
 
-**Example - Task 1 (Walking)**: Script automatically runs:
-1. vx=0.5 m/s for 5s (slow)
-2. vx=1.0 m/s for 5s (normal)
-3. vx=1.5 m/s for 5s (fast)
-4. vx=0.8 m/s for 5s (moderate)
+### Comparison Table
 
-**Manual ROS 2 Command** (static velocity):
-```bash
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
-  "linear: {x: 1.0, y: 0.0, z: 0.0}
-   angular: {x: 0.0, y: 0.0, z: 0.0}" --rate 10
-```
-
-### 📋 Task Sequences Reference
-
-| Task | Sequence Details |
-|------|------------------|
-| **0** | vx=0.0, vy=0.0, wz=0.0 for 20s |
-| **1** | vx: 0.5 (5s) → 1.0 (5s) → 1.5 (5s) → 0.8 (5s) |
-| **2** | wz: +0.5 (5s) → +1.0 (5s) → -1.0 (5s) → +1.5 (5s) |
-| **3** | (0.8, +0.6) 5s → (1.0, 0.0) 2s → (0.8, -0.6) 5s → (1.2, 0.0) 3s → (0.5, +1.0) 5s |
+| Feature | Isaac Lab | Gazebo |
+|---------|-----------|--------|
+| **Command** | `python test_isaac_task.py --task <0-3>` | `./test_gazebo_task.sh` → select task |
+| **Task 0** | ✅ Supported | ✅ Supported (auto-runs) |
+| **Task 1** | ✅ Supported | ✅ Auto-runs 4 speeds |
+| **Task 2** | ✅ Supported | ✅ Auto-runs 4 rates |
+| **Task 3** | ✅ Supported | ✅ Auto-runs 5 maneuvers |
+| **Sequences** | Exact training sequences | Exact training sequences |
+| **Policy** | MLP/LSTM (--lstm flag) | MLP/LSTM (launch param) |
+| **Visualization** | Isaac Sim GUI | Gazebo GUI |
