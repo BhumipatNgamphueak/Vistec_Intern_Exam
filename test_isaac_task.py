@@ -18,6 +18,51 @@ import sys
 import subprocess
 from pathlib import Path
 
+
+def check_isaaclab_env():
+    """
+    Check if Isaac Lab environment is properly set up.
+
+    Returns
+    -------
+    bool
+        True if environment is ready, False otherwise
+    """
+    try:
+        # Try to import Isaac Lab's rsl_rl package
+        import importlib.metadata
+        version = importlib.metadata.version("rsl-rl-lib")
+        print(f"✅ Isaac Lab environment detected (rsl-rl-lib v{version})")
+        return True
+    except importlib.metadata.PackageNotFoundError:
+        print("=" * 70)
+        print("❌ ERROR: Isaac Lab environment not activated!")
+        print("=" * 70)
+        print()
+        print("Isaac Lab's Python packages (rsl-rl-lib) are not installed in the")
+        print("current Python environment.")
+        print()
+        print("SOLUTION: Activate the Isaac Lab conda environment first:")
+        print()
+        print("  # If you have a conda environment for Isaac Lab:")
+        print("  conda activate env_isaaclab")
+        print()
+        print("  # Or check available conda environments:")
+        print("  conda env list")
+        print()
+        print("  # If Isaac Lab is not installed, install it:")
+        print("  cd ~/IsaacLab")
+        print("  ./isaaclab.sh --install")
+        print()
+        print("Then run this script again:")
+        print("  python test_isaac_task.py --task 0")
+        print()
+        print("=" * 70)
+        return False
+    except Exception as e:
+        print(f"⚠️  Warning: Could not verify Isaac Lab environment: {e}")
+        return True  # Continue anyway
+
 # Training experiment sequences (from generate_4_task_episodes.py)
 TASK_SEQUENCES = {
     "0": {
@@ -62,13 +107,29 @@ TASK_SEQUENCES = {
 
 # Policy configurations
 POLICIES = {
-    "mlp": {
+    "mlp_dr": {
         "checkpoint": "trained_models/mlp_dr.pt",
         "task": "Unitree-Go2-Velocity-MLP-Custom"
     },
-    "lstm": {
+    "mlp": {
+        "checkpoint": "trained_models/mlp.pt",
+        "task": "Unitree-Go2-Velocity-MLP-No-DR"
+    },
+    "lstm_dr": {
         "checkpoint": "trained_models/lstm_dr.pt",
         "task": "Unitree-Go2-Velocity-LSTM-DR"
+    },
+    "lstm": {
+        "checkpoint": "trained_models/lstm.pt",
+        "task": "Unitree-Go2-Velocity-LSTM-No-DR"
+    },
+    "implicit_dr": {
+        "checkpoint": "trained_models/Implicit_dr.pt",
+        "task": "Unitree-Go2-Velocity-Implicit-DR"
+    },
+    "implicit": {
+        "checkpoint": "trained_models/implicit.pt",
+        "task": "Unitree-Go2-Velocity-Implicit"
     }
 }
 
@@ -169,9 +230,16 @@ def run_isaac_test(task_id: str, policy_type: str = "mlp", num_envs: int = 1):
     task_info = TASK_SEQUENCES[task_id]
     policy_info = POLICIES[policy_type]
 
-    # Get paths (expand ~ to home directory)
-    vistec_repo = Path(os.getenv("VISTEC_REPO", os.path.expanduser("~/Vistec_Intern_Exam")))
-    isaaclab_path = Path(os.getenv("ISAACLAB_PATH", os.path.expanduser("~/IsaacLab")))
+    # Get paths (expand ~ to home directory and resolve to absolute paths)
+    vistec_repo = Path(os.path.expanduser(os.getenv("VISTEC_REPO", "~/Vistec_Intern_Exam"))).resolve()
+    isaaclab_path = Path(os.path.expanduser(os.getenv("ISAACLAB_PATH", "~/IsaacLab"))).resolve()
+
+    # Validate isaaclab.sh exists at the resolved path
+    if not (isaaclab_path / "isaaclab.sh").exists():
+        print(f"❌ ERROR: isaaclab.sh not found at {isaaclab_path}")
+        print(f"   ISAACLAB_PATH is set to: {os.getenv('ISAACLAB_PATH', '(not set, defaulting to ~/IsaacLab)')}")
+        print(f"   Please set ISAACLAB_PATH to your IsaacLab installation directory.")
+        return False
 
     checkpoint_path = Path(vistec_repo) / policy_info["checkpoint"]
     if not checkpoint_path.exists():
@@ -223,18 +291,21 @@ def run_isaac_test(task_id: str, policy_type: str = "mlp", num_envs: int = 1):
     print()
 
     # Build command using Isaac Lab wrapper script
-    isaaclab_script = Path(isaaclab_path) / "isaaclab.sh"
+    # Use ./isaaclab.sh when running from IsaacLab directory
     play_script_rel = "scripts/reinforcement_learning/rsl_rl/play.py"
 
     cmd = [
-        str(isaaclab_script),
+        str(isaaclab_path / "isaaclab.sh"),  # Use absolute path to isaaclab.sh
         "-p", play_script_rel,
         "--task", policy_info['task'],
         "--checkpoint", str(checkpoint_path),
-        "--num_envs", str(num_envs)
+        "--num_envs", str(num_envs),
+        "--vx", str(vx),
+        "--vy", str(vy),
+        "--wz", str(wz)
     ]
 
-    print(f"Command: {' '.join(cmd)}")
+    print(f"Command (from {isaaclab_path}): {' '.join(cmd)}")
     print()
     print("Starting simulation...")
     print("=" * 70)
@@ -258,27 +329,23 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python test_isaac_task.py --task 0           # Test Task 0 (Standing)
-  python test_isaac_task.py --task 1 --lstm    # Test Task 1 (Walking) with LSTM
-  python test_isaac_task.py --task 3 --envs 4  # Test Task 3 with 4 parallel envs
-  python test_isaac_task.py --list             # List all tasks
+  python test_isaac_task.py --task 0                    # Test Task 0 (Standing) with mlp_dr
+  python test_isaac_task.py --task 1 --policy lstm_dr   # Test Task 1 (Walking) with LSTM+DR
+  python test_isaac_task.py --task 2 --policy implicit_dr  # Test Task 2 with Implicit+DR
+  python test_isaac_task.py --task 3 --envs 4           # Test Task 3 with 4 parallel envs
+  python test_isaac_task.py --list                      # List all tasks
         """
     )
 
     parser.add_argument("--task", type=str,
                         help="Task ID (0=Standing, 1=Walking, 2=Turn, 3=Walk+Turn)")
-    parser.add_argument("--policy", type=str, default="mlp", choices=["mlp", "lstm"],
-                        help="Policy type (default: mlp)")
+    parser.add_argument("--policy", type=str, default="mlp_dr",
+                        choices=["mlp_dr", "mlp", "lstm_dr", "lstm", "implicit_dr", "implicit"],
+                        help="Policy type (default: mlp_dr)")
     parser.add_argument("--envs", type=int, default=1,
                         help="Number of parallel environments (default: 1)")
     parser.add_argument("--list", action="store_true",
                         help="List all available tasks")
-
-    # Shortcuts
-    parser.add_argument("--mlp", action="store_const", const="mlp", dest="policy",
-                        help="Use MLP policy (same as --policy mlp)")
-    parser.add_argument("--lstm", action="store_const", const="lstm", dest="policy",
-                        help="Use LSTM policy (same as --policy lstm)")
 
     args = parser.parse_args()
 
@@ -293,7 +360,7 @@ Examples:
         print("\n❌ ERROR: Please specify --task")
         print("\nExamples:")
         print("  python test_isaac_task.py --task 0")
-        print("  python test_isaac_task.py --task 1 --lstm")
+        print("  python test_isaac_task.py --task 1 --policy lstm_dr")
         return
 
     # Validate task
@@ -302,6 +369,10 @@ Examples:
         print("Valid tasks: 0, 1, 2, 3")
         print("Run with --list to see all tasks")
         return
+
+    # Check Isaac Lab environment
+    if not check_isaaclab_env():
+        sys.exit(1)
 
     # Run test
     success = run_isaac_test(args.task, args.policy, args.envs)

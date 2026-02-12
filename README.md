@@ -282,14 +282,22 @@ Two testing environments available:
 
 ### Prerequisites
 
-```bash
-# Activate Isaac Lab environment (if using conda)
-conda activate env_isaaclab  # Skip if not using conda
+**⚠️ IMPORTANT: Activate Isaac Lab Environment First!**
 
-# Set environment variables
+```bash
+# 1. Activate Isaac Lab conda environment (REQUIRED!)
+conda activate env_isaaclab
+
+# If you don't have this environment, install Isaac Lab:
+# cd ~/IsaacLab && ./isaaclab.sh --install
+
+# 2. Set environment variables
 export VISTEC_REPO=~/Vistec_Intern_Exam
 export UNITREE_LAB=$VISTEC_REPO/unitree_rl_lab
 export ISAACLAB_PATH=~/IsaacLab
+
+# 3. Verify Isaac Lab is installed
+python -c "from importlib.metadata import version; print('Isaac Lab:', version('rsl-rl-lib'))"
 ```
 
 ### Method 1: Direct Testing with Test Script (RECOMMENDED)
@@ -299,7 +307,7 @@ export ISAACLAB_PATH=~/IsaacLab
 ```bash
 cd $VISTEC_REPO
 
-# Task 0: Standing (20s)
+# Task 0: Standing (20s) - default: mlp_dr
 python test_isaac_task.py --task 0
 
 # Task 1: Walking (4 speeds, auto-switching)
@@ -311,8 +319,9 @@ python test_isaac_task.py --task 2
 # Task 3: Walk + Turn (5 maneuvers, auto-switching)
 python test_isaac_task.py --task 3
 
-# Test with LSTM policy
-python test_isaac_task.py --task 1 --lstm
+# Test with different policies
+python test_isaac_task.py --task 1 --policy lstm_dr
+python test_isaac_task.py --task 1 --policy implicit_dr
 
 # List all tasks and sequences
 python test_isaac_task.py --list
@@ -320,14 +329,21 @@ python test_isaac_task.py --list
 
 **Command Pattern:**
 ```bash
-python test_isaac_task.py --task <TASK_ID> [--lstm] [--envs <NUM>]
+python test_isaac_task.py --task <TASK_ID> [--policy <MODEL>] [--envs <NUM>]
 
 # Parameters:
-#   --task <0-3>    : Task ID (0=Standing, 1=Walking, 2=Turn, 3=Walk+Turn)
-#   --lstm          : Use LSTM policy instead of MLP (optional)
-#   --mlp           : Use MLP policy (default)
-#   --envs <NUM>    : Number of parallel environments (default: 1)
-#   --list          : List all tasks
+#   --task <0-3>       : Task ID (0=Standing, 1=Walking, 2=Turn, 3=Walk+Turn)
+#   --policy <MODEL>   : Policy/model to use (default: mlp_dr)
+#   --envs <NUM>       : Number of parallel environments (default: 1)
+#   --list             : List all tasks
+
+# Available models (--policy):
+#   mlp_dr       (default) → trained_models/mlp_dr.pt       (Task: Unitree-Go2-Velocity-MLP-Custom)
+#   mlp                    → trained_models/mlp.pt           (Task: Unitree-Go2-Velocity-MLP-No-DR)
+#   lstm_dr                → trained_models/lstm_dr.pt       (Task: Unitree-Go2-Velocity-LSTM-DR)
+#   lstm                   → trained_models/lstm.pt          (Task: Unitree-Go2-Velocity-LSTM-No-DR)
+#   implicit_dr            → trained_models/Implicit_dr.pt   (Task: Unitree-Go2-Velocity-Implicit-DR)
+#   implicit               → trained_models/implicit.pt      (Task: Unitree-Go2-Velocity-Implicit)
 ```
 
 **Examples:**
@@ -341,9 +357,9 @@ for task in 0 1 2 3; do
     python test_isaac_task.py --task $task
 done
 
-# Test with both MLP and LSTM policies
-for policy in mlp lstm; do
-    python test_isaac_task.py --task 1 --$policy
+# Test with all 6 policies
+for policy in mlp_dr mlp lstm_dr lstm implicit_dr implicit; do
+    python test_isaac_task.py --task 1 --policy $policy
 done
 ```
 
@@ -573,6 +589,9 @@ The robot is trained and tested on **4 fundamental locomotion primitives** with 
 ### Isaac Lab - Quick Commands
 
 ```bash
+# First: Activate Isaac Lab environment!
+conda activate env_isaaclab
+
 cd $VISTEC_REPO
 
 # Test Task 0 (Standing)
