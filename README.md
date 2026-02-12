@@ -153,7 +153,7 @@ All models are in `trained_models/` directory (27 MB total):
 # Activate Isaac Lab environment (if using conda)
 conda activate env_isaaclab  # Skip if not using conda
 
-cd $UNITREE_LAB
+cd ~/IsaacLab
 
 # 1. MLP with DR (RECOMMENDED - Best Sim2Sim transfer)
 ~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
@@ -226,7 +226,7 @@ cd $UNITREE_LAB
 # Activate Isaac Lab environment (if using conda)
 conda activate env_isaaclab  # Skip if not using conda
 
-cd $UNITREE_LAB
+cd ~/IsaacLab
 
 # Train MLP policy with domain randomization (RECOMMENDED)
 # Time: 6-8 hours on RTX 3090
@@ -250,7 +250,7 @@ cd $UNITREE_LAB
 # Activate Isaac Lab environment (if using conda)
 conda activate env_isaaclab  # Skip if not using conda
 
-cd $UNITREE_LAB
+cd ~/IsaacLab
 
 # Test policy (automatically exports to ONNX/JIT)
 ~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
@@ -366,7 +366,7 @@ done
 ### Method 2: Direct Isaac Lab Play Script
 
 ```bash
-cd $UNITREE_LAB
+cd ~/IsaacLab
 
 # MLP Policy with DR (RECOMMENDED)
 ~/IsaacLab/isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
