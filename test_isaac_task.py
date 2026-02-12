@@ -222,12 +222,13 @@ def run_isaac_test(task_id: str, policy_type: str = "mlp", num_envs: int = 1):
     print(f"Running with representative command: vx={vx}, vy={vy}, wz={wz}")
     print()
 
-    # Build command
-    play_script = Path(isaaclab_path) / "scripts" / "reinforcement_learning" / "rsl_rl" / "play.py"
+    # Build command using Isaac Lab wrapper script
+    isaaclab_script = Path(isaaclab_path) / "isaaclab.sh"
+    play_script_rel = "scripts/reinforcement_learning/rsl_rl/play.py"
 
     cmd = [
-        "python",
-        str(play_script),
+        str(isaaclab_script),
+        "-p", play_script_rel,
         "--task", policy_info['task'],
         "--checkpoint", str(checkpoint_path),
         "--num_envs", str(num_envs)
@@ -241,7 +242,7 @@ def run_isaac_test(task_id: str, policy_type: str = "mlp", num_envs: int = 1):
 
     # Run the command
     try:
-        subprocess.run(cmd, check=True, cwd=vistec_repo)
+        subprocess.run(cmd, check=True)
         return True
     except subprocess.CalledProcessError as e:
         print(f"\n❌ ERROR: Command failed with exit code {e.returncode}")
