@@ -32,8 +32,8 @@ Vistec_Intern_Exam/
 ├── README.md                          # This complete guide
 │
 ├── verify_setup.sh                    # Setup verification script
-├── send_velocity_commands_gazebo.sh   # Gazebo velocity control (4 tasks + custom)
-├── send_velocity_commands_isaac.py    # Isaac velocity presets (4 tasks)
+├── test_isaac_task.py                 # Isaac Lab testing (exact training sequences)
+├── test_gazebo_task.sh                # Gazebo testing (auto-running sequences)
 │
 ├── trained_models/                    # Pre-trained policies (27 MB)
 │   ├── mlp_dr.pt                      # ⭐ RECOMMENDED (MLP + DR)
@@ -349,20 +349,21 @@ ros2 launch go2_gazebo_simulation go2_fortress.launch.py
 
 **Step 3: Send Velocity Commands (Terminal 3)**
 
-**Interactive Menu (4 main tasks + custom)**:
+**Automatic Testing with Training Sequences**:
 ```bash
 cd $VISTEC_REPO
-./send_velocity_commands_gazebo.sh
+./test_gazebo_task.sh
 
-# Select an option:
-# 1 - Task 1: Standing
-# 2 - Task 2: Walking (1.0 m/s)
-# 3 - Task 3: Turn in Place (1.0 rad/s)
-# 4 - Task 4: Walk + Turn (arc)
-# 5 - Custom command
+# Select a task (0-3):
+# 0 - Task 0: Standing (20s)
+# 1 - Task 1: Walking (auto-runs 4 speeds)
+# 2 - Task 2: Turn (auto-runs 4 rates)
+# 3 - Task 3: Walk+Turn (auto-runs 5 maneuvers)
+
+# Script automatically executes the entire 20-second sequence!
 ```
 
-**Manual Command**:
+**Manual Static Command**:
 ```bash
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
   "linear: {x: 1.0, y: 0.0, z: 0.0}
@@ -373,71 +374,82 @@ ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
 
 ## 🎯 4 Locomotion Tasks
 
-The robot is trained and tested on **4 fundamental locomotion primitives**:
+The robot is trained and tested on **4 fundamental locomotion primitives** with time-varying sequences:
 
-| Task | Description | lin_x (m/s) | lin_y (m/s) | ang_z (rad/s) | Isaac Preset | Gazebo Menu |
-|------|-------------|-------------|-------------|---------------|--------------|-------------|
-| **1** | Standing | 0.0 | 0.0 | 0.0 | `--task 1` | Option 1 |
-| **2** | Walking (forward) | 1.0 | 0.0 | 0.0 | `--task 2` | Option 2 |
-| **3** | Turn in Place (CCW) | 0.0 | 0.0 | 1.0 | `--task 3` | Option 3 |
-| **4** | Walk + Turn (arc) | 0.8 | 0.0 | 0.6 | `--task 4` | Option 4 |
+| Task | Description | Duration | Sequence | Isaac | Gazebo |
+|------|-------------|----------|----------|-------|--------|
+| **0** | Standing | 20s | vx=0.0 (constant) | `--task 0` | Option 0 |
+| **1** | Walking | 20s | vx: 0.5→1.0→1.5→0.8 m/s (5s each) | `--task 1` | Option 1 |
+| **2** | Turn in Place | 20s | wz: +0.5→+1.0→-1.0→+1.5 rad/s (5s each) | `--task 2` | Option 2 |
+| **3** | Walk + Turn | 20s | 5 maneuvers (arc, straight, etc.) | `--task 3` | Option 3 |
 
-**Notes**:
-- Use custom velocities with `--linear_x` and `--angular_z` parameters for fine-tuning
-- Gazebo: Select option 5 for custom command
-- Isaac Lab: Modify config file ranges for specific velocities (see script output)
+**Training Sequences**:
+- **Task 0**: Standing still for 20 seconds
+- **Task 1**: 4 different walking speeds (slow, normal, fast, moderate)
+- **Task 2**: 4 different turn rates including direction change (CCW→CW→CCW)
+- **Task 3**: 5 combined maneuvers (right arc, straight, left arc, fast, tight turn)
+
+**Note**: Test scripts use the **exact time-varying sequences** from training experiments!
 
 ---
 
-## 📊 Velocity Commands Guide
+## 📊 Testing with Exact Training Sequences
 
-Testing the 4 locomotion tasks is simple:
+Test policies with the **same time-varying sequences** used in training:
 
-### 🎯 Using Isaac Lab
+### 🎯 Isaac Lab Testing
 
-**4 Main Tasks**:
 ```bash
-python send_velocity_commands_isaac.py --task 1   # Task 1: Standing
-python send_velocity_commands_isaac.py --task 2   # Task 2: Walking (1.0 m/s)
-python send_velocity_commands_isaac.py --task 3   # Task 3: Turn in Place (1.0 rad/s)
-python send_velocity_commands_isaac.py --task 4   # Task 4: Walk+Turn (arc)
+# Test with exact training sequences
+python test_isaac_task.py --task 0    # Task 0: Standing (20s)
+python test_isaac_task.py --task 1    # Task 1: Walking (4 speeds)
+python test_isaac_task.py --task 2    # Task 2: Turn (4 rates)
+python test_isaac_task.py --task 3    # Task 3: Walk+Turn (5 maneuvers)
+
+# With LSTM policy
+python test_isaac_task.py --task 1 --lstm
+
+# List all tasks and sequences
+python test_isaac_task.py --list
+
+# Test all tasks
+for task in 0 1 2 3; do
+    python test_isaac_task.py --task $task
+done
 ```
 
-**Custom Velocities**:
-```bash
-# Custom velocity command
-python send_velocity_commands_isaac.py --linear_x 0.7 --angular_z 0.4
+### 🎯 Gazebo Testing
 
-# List all tasks
-python send_velocity_commands_isaac.py --list
+**Automatic sequence execution** (runs entire 20s sequence):
+
+```bash
+./test_gazebo_task.sh
+
+# Select task:
+# 0 - Task 0: Standing (20s)
+# 1 - Task 1: Walking (4 speeds, auto-switching)
+# 2 - Task 2: Turn (4 rates, auto-switching)
+# 3 - Task 3: Walk+Turn (5 maneuvers, auto-switching)
 ```
 
-### 🎯 Using Gazebo
+**Example - Task 1 (Walking)**: Script automatically runs:
+1. vx=0.5 m/s for 5s (slow)
+2. vx=1.0 m/s for 5s (normal)
+3. vx=1.5 m/s for 5s (fast)
+4. vx=0.8 m/s for 5s (moderate)
 
-**4 Main Tasks**:
+**Manual ROS 2 Command** (static velocity):
 ```bash
-./send_velocity_commands_gazebo.sh
-
-# Then select:
-# 1 - Task 1: Standing
-# 2 - Task 2: Walking
-# 3 - Task 3: Turn in Place
-# 4 - Task 4: Walk + Turn
-# 5 - Custom command
-```
-
-| Option | Task | Velocities (vx, vy, wz) |
-|--------|------|-------------------------|
-| **1** | Standing | (0.0, 0.0, 0.0) |
-| **2** | Walking | (1.0, 0.0, 0.0) |
-| **3** | Turn in Place | (0.0, 0.0, 1.0) |
-| **4** | Walk + Turn | (0.8, 0.0, 0.6) |
-| **5** | Custom | (enter values) |
-
-**Manual ROS 2 Command**:
-```bash
-# Publish velocity directly
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
   "linear: {x: 1.0, y: 0.0, z: 0.0}
    angular: {x: 0.0, y: 0.0, z: 0.0}" --rate 10
 ```
+
+### 📋 Task Sequences Reference
+
+| Task | Sequence Details |
+|------|------------------|
+| **0** | vx=0.0, vy=0.0, wz=0.0 for 20s |
+| **1** | vx: 0.5 (5s) → 1.0 (5s) → 1.5 (5s) → 0.8 (5s) |
+| **2** | wz: +0.5 (5s) → +1.0 (5s) → -1.0 (5s) → +1.5 (5s) |
+| **3** | (0.8, +0.6) 5s → (1.0, 0.0) 2s → (0.8, -0.6) 5s → (1.2, 0.0) 3s → (0.5, +1.0) 5s |
