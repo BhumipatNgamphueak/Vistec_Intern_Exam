@@ -29,55 +29,80 @@
 
 ```
 Vistec_Intern_Exam/
-├── README.md                          # This complete guide
+├── README.md
+├── verify_setup.sh
+├── test_isaac_task.py
+├── test_gazebo_task.sh
+├── send_velocity_commands_gazebo.sh
+├── send_velocity_commands_isaac.py
 │
-├── verify_setup.sh                    # Setup verification script
-├── test_isaac_task.py                 # Isaac Lab testing (exact training sequences)
-├── test_gazebo_task.sh                # Gazebo testing (auto-running sequences)
+├── trained_models/
+│   ├── mlp_dr.pt                      
+│   ├── mlp.pt
+│   ├── lstm_dr.pt
+│   ├── lstm.pt
+│   ├── Implicit_dr.pt
+│   ├── implicit.pt
+│   └── exported/
+│       ├── policy.onnx
+│       └── policy.pt
 │
-├── trained_models/                    # Pre-trained policies (27 MB)
-│   ├── mlp_dr.pt                      # ⭐ RECOMMENDED (MLP + DR)
-│   ├── mlp.pt                         # MLP without DR
-│   ├── lstm_dr.pt                     # LSTM + DR
-│   ├── lstm.pt                        # LSTM without DR
-│   ├── Implicit_dr.pt                 # Implicit actuator + DR
-│   └── implicit.pt                    # Implicit without DR
-│
-├── unitree_rl_lab/                    # ⭐ COMPLETE Isaac Lab framework
-│   ├── source/                        # Framework source code
+├── unitree_rl_lab/
+│   ├── Configs/
+│   │   ├── __init__.py
+│   │   ├── velocity_env_cfg.py
+│   │   ├── velocity_env_cfg_mlp_custom.py
+│   │   ├── velocity_env_cfg_mlp_no_dr.py
+│   │   ├── velocity_env_cfg_lstm.py
+│   │   ├── velocity_env_cfg_lstm_custom.py
+│   │   ├── velocity_env_cfg_lstm_custom_enhanced.py
+│   │   ├── velocity_env_cfg_lstm_with_dr.py
+│   │   ├── velocity_env_cfg_lstm_no_dr.py
+│   │   ├── velocity_env_cfg_lstm_my_model.py
+│   │   ├── velocity_env_cfg_implicit.py
+│   │   └── velocity_env_cfg_implicit_with_dr.py
+│   ├── source/
 │   │   └── unitree_rl_lab/
+│   │       ├── setup.py
 │   │       └── unitree_rl_lab/
-│   │           ├── assets/            # Robot definitions, actuator models
-│   │           ├── tasks/             # Environment implementations (Go2, H1, G1)
-│   │           └── utils/             # Core utilities
-│   ├── scripts/                       # Training & testing scripts
-│   │   ├── rsl_rl/                    # train.py, play.py
-│   │   ├── actuator_comparison/       # Comparison tools
-│   │   ├── data_collection/           # Data loggers
-│   │   └── motor_testing/             # Motor tests
-│   ├── Configs/                       # 12 custom task configs
-│   ├── Utils/                         # Episode generators
-│   ├── Testing_Scripts/               # Chirp tests
-│   ├── Policy_Playback/               # Custom playback
-│   ├── deploy/                        # Real robot deployment (C++)
-│   ├── docker/                        # Docker setup
-│   └── unitree_rl_lab.sh              # Setup script
+│   │           ├── assets/
+│   │           ├── tasks/
+│   │           └── utils/
+│   ├── scripts/
+│   │   ├── rsl_rl/
+│   │   ├── actuator_comparison/
+│   │   └── motor_testing/
+│   ├── Utils/
+│   ├── Testing_Scripts/
+│   ├── Policy_Playback/
+│   ├── deploy/
+│   ├── docker/
+│   └── unitree_rl_lab.sh
 │
-├── Actuator_net/                      # Pre-trained actuator models
-│   ├── train.py, train_lstm.py        # Training scripts
-│   ├── test.py                        # Validation
-│   └── app/resources/                 # 3 pre-trained models (598 KB)
-│       ├── actuator_lstm.pth          # LSTM (R²=0.999)
-│       ├── actuator.pth               # MLP (R²=0.998)
-│       └── actuator_lstm_6input.pth   # 6-input variant
+├── Actuator_net/
+│   ├── train.py
+│   ├── train_lstm.py
+│   ├── test.py
+│   ├── process_dataset.py
+│   └── app/
+│       └── resources/
+│           ├── actuator.pth
+│           ├── actuator_lstm.pth
+│           ├── actuator.pt
+│           └── actuator_lstm.pt
 │
-└── Vistec_ex_ws/                      # ROS 2 deployment workspace
+└── Vistec_ex_ws/
     └── src/
-        ├── deploy_policy/             # Policy inference node
-        │   └── config/README_CONFIG.md
-        └── go2_gazebo_simulation/     # Gazebo simulation setup
-
-
+        ├── deploy_policy/
+        │   ├── config/
+        │   ├── deploy_policy/
+        │   ├── launch/
+        │   └── scripts/
+        └── go2_gazebo_simulation/
+            ├── urdf/
+            ├── meshes/
+            ├── launch/
+            └── worlds/
 ```
 ## 🚀 Quick Start
 
