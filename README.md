@@ -8,7 +8,6 @@
 [![Gazebo](https://img.shields.io/badge/Gazebo-Ignition-orange)](https://gazebosim.org/)
 [![Python](https://img.shields.io/badge/Python-3.10-blue)](https://www.python.org/)
 
-**Complete, self-contained Sim2Sim transfer learning package**. Train in Isaac Lab, deploy to Gazebo. No additional repos needed!
 
 **Last Updated**: February 12, 2026
 
@@ -24,23 +23,7 @@
 | [Training Pipeline](#-training-pipeline) | Train your own policies |
 | [4 Locomotion Tasks](#-4-locomotion-tasks) | Stand, Walk, Turn, Combined |
 | [Velocity Commands](#-velocity-commands-guide) | Testing the 4 tasks |
-| [Troubleshooting](#-troubleshooting) | Common issues & solutions |
 | [Task Names](#-registered-task-names) | All registered Isaac Lab tasks |
-
----
-
-## 🎯 Overview
-
-This repository enables you to:
-- ✅ **Train** locomotion policies in Isaac Lab (PhysX simulator)
-- ✅ **Deploy** policies to Gazebo (DART/ODE simulator) via ROS 2
-- ✅ **Test** 4 fundamental locomotion tasks (standing, walking, turning, combined)
-- ✅ **Compare** 3 actuator models (MLP, LSTM, Implicit)
-- ✅ **Validate** Sim2Sim transfer with comprehensive domain randomization
-
-**Key Research Contribution**: Successfully transfer policies trained in Isaac Lab to Gazebo with minimal performance degradation using 15 domain randomization strategies.
-
----
 
 ## 📁 Repository Structure
 
@@ -93,18 +76,6 @@ Vistec_Intern_Exam/
         ├── deploy_policy/             # Policy inference node
         │   └── config/README_CONFIG.md
         └── go2_gazebo_simulation/     # Gazebo simulation setup
-```
-
-> **📌 IMPORTANT**: This repository is **SELF-CONTAINED** with everything you need:
-> - ✅ Complete Isaac Lab framework (source/, scripts/)
-> - ✅ Pre-trained policies (27 MB - 6 models)
-> - ✅ Actuator models (LSTM, MLP, Implicit)
-> - ✅ 12 custom training configurations
-> - ✅ ROS 2 deployment workspace
->
-> **No additional cloning required!** Just clone and run.
-
----
 
 ## 🚀 Quick Start
 
